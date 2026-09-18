@@ -10,17 +10,18 @@ import model.Emergency;
 import model.ResponseTeam;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import model.Assignment;
 
-public class EmergencyManagementPanel
-        extends JPanel {
+public class EmergencyManagementPanel extends JPanel {
 
     // =========================================================
-    // MANAGERS
+    // SHARED MANAGERS
     // =========================================================
 
     private final EmergencyManager emergencyManager;
@@ -42,11 +43,11 @@ public class EmergencyManagementPanel
 
     private JTextField locationField;
 
-    private JTextArea descriptionArea;
-
     private JTextField dateTimeField;
 
     private JComboBox<EmergencyStatus> statusComboBox;
+
+    private JTextArea descriptionArea;
 
 
     // =========================================================
@@ -63,6 +64,37 @@ public class EmergencyManagementPanel
     private JTable emergencyTable;
 
     private DefaultTableModel tableModel;
+
+
+    // =========================================================
+    // CRUD BUTTONS
+    // =========================================================
+
+    private JButton addButton;
+
+    private JButton updateButton;
+
+    private JButton deleteButton;
+
+    private JButton clearFormButton;
+
+
+    // =========================================================
+    // WORKFLOW BUTTONS
+    // =========================================================
+
+    private JButton startResponseButton;
+
+    private JButton resolveButton;
+
+    private JButton cancelEmergencyButton;
+
+
+    // =========================================================
+    // SELECTED EMERGENCY
+    // =========================================================
+
+    private Emergency selectedEmergency;
 
 
     // =========================================================
@@ -84,11 +116,19 @@ public class EmergencyManagementPanel
         this.assignmentManager =
                 assignmentManager;
 
+
+        setLayout(
+                new BorderLayout()
+        );
+
+        setBackground(
+                Theme.BACKGROUND
+        );
+
+
         buildUI();
 
         loadEmergencies();
-
-        clearForm();
     }
 
 
@@ -98,62 +138,119 @@ public class EmergencyManagementPanel
 
     private void buildUI() {
 
-        setLayout(
-                new BorderLayout(
-                        0,
-                        15
-                )
-        );
+        // =====================================================
+        // PAGE HEADER
+        // =====================================================
 
-        setBackground(
+        JPanel headerPanel =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        headerPanel.setBackground(
                 Theme.BACKGROUND
         );
 
-        setBorder(
+        headerPanel.setBorder(
                 BorderFactory.createEmptyBorder(
-                        18,
-                        20,
-                        18,
-                        20
+                        22,
+                        25,
+                        10,
+                        25
                 )
+        );
+
+
+        JPanel titlePanel =
+                new JPanel(
+                        new BorderLayout(
+                                0,
+                                5
+                        )
+                );
+
+        titlePanel.setBackground(
+                Theme.BACKGROUND
+        );
+
+
+        JLabel titleLabel =
+                new JLabel(
+                        "EMERGENCY MANAGEMENT"
+                );
+
+        titleLabel.setFont(
+                Theme.PAGE_TITLE_FONT
+        );
+
+        titleLabel.setForeground(
+                Theme.TEXT
+        );
+
+
+        JLabel subtitleLabel =
+                new JLabel(
+                        "Record and manage emergency incidents."
+                );
+
+        subtitleLabel.setFont(
+                Theme.NORMAL_FONT
+        );
+
+        subtitleLabel.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+
+        titlePanel.add(
+                titleLabel,
+                BorderLayout.NORTH
+        );
+
+        titlePanel.add(
+                subtitleLabel,
+                BorderLayout.CENTER
+        );
+
+
+        headerPanel.add(
+                titlePanel,
+                BorderLayout.WEST
         );
 
 
         add(
-                createPageHeader(),
+                headerPanel,
                 BorderLayout.NORTH
         );
 
 
         // =====================================================
-        // MAIN MANAGEMENT AREA
+        // MAIN SPLIT PANE
         // =====================================================
 
         JSplitPane splitPane =
                 new JSplitPane(
                         JSplitPane.HORIZONTAL_SPLIT,
-                        createFormScrollPane(),
+                        createFormPanel(),
                         createTablePanel()
                 );
 
-
-        splitPane.setDividerLocation(
-                420
-        );
-
-
         splitPane.setResizeWeight(
-                0.34
+                0.42
         );
 
-
-        splitPane.setContinuousLayout(
-                true
+        splitPane.setDividerSize(
+                8
         );
-
 
         splitPane.setBorder(
-                null
+                BorderFactory.createEmptyBorder(
+                        0,
+                        20,
+                        20,
+                        20
+                )
         );
 
 
@@ -163,134 +260,18 @@ public class EmergencyManagementPanel
         );
 
 
+        // =====================================================
+        // BOTTOM ACTION AREA
+        // =====================================================
+
+        JPanel bottomWrapper =
+                createBottomActionPanel();
+
+
         add(
-                createActionBar(),
+                bottomWrapper,
                 BorderLayout.SOUTH
         );
-    }
-
-
-    // =========================================================
-    // PAGE HEADER
-    // =========================================================
-
-    private JPanel createPageHeader() {
-
-        JPanel panel =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        panel.setBackground(
-                Theme.BACKGROUND
-        );
-
-
-        JPanel titlePanel =
-                new JPanel();
-
-        titlePanel.setLayout(
-                new BoxLayout(
-                        titlePanel,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        titlePanel.setBackground(
-                Theme.BACKGROUND
-        );
-
-
-        JLabel title =
-                new JLabel(
-                        "EMERGENCY MANAGEMENT"
-                );
-
-        title.setFont(
-                Theme.PAGE_TITLE_FONT
-        );
-
-        title.setForeground(
-                Theme.TEXT
-        );
-
-
-        JLabel subtitle =
-                new JLabel(
-                        "Record and manage emergency incidents."
-                );
-
-        subtitle.setFont(
-                Theme.NORMAL_FONT
-        );
-
-        subtitle.setForeground(
-                Theme.MUTED_TEXT
-        );
-
-
-        titlePanel.add(
-                title
-        );
-
-
-        titlePanel.add(
-                Box.createVerticalStrut(
-                        3
-                )
-        );
-
-
-        titlePanel.add(
-                subtitle
-        );
-
-
-        panel.add(
-                titlePanel,
-                BorderLayout.WEST
-        );
-
-
-        return panel;
-    }
-
-
-    // =========================================================
-    // FORM SCROLL PANE
-    // =========================================================
-
-    private JScrollPane createFormScrollPane() {
-
-        JPanel outerPanel =
-                createFormPanel();
-
-
-        JScrollPane scrollPane =
-                new JScrollPane(
-                        outerPanel
-                );
-
-
-        scrollPane.setBorder(
-                BorderFactory.createLineBorder(
-                        Theme.KHAKI_BEIGE
-                )
-        );
-
-
-        scrollPane.setHorizontalScrollBarPolicy(
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
-        );
-
-
-        scrollPane.getVerticalScrollBar()
-                .setUnitIncrement(
-                        14
-                );
-
-
-        return scrollPane;
     }
 
 
@@ -305,18 +286,21 @@ public class EmergencyManagementPanel
                         new BorderLayout()
                 );
 
-
         outerPanel.setBackground(
-                Theme.ALMOND_CREAM
+                Theme.BACKGROUND
         );
 
-
         outerPanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        18,
-                        18,
-                        18,
-                        18
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(
+                                Theme.KHAKI_BEIGE
+                        ),
+                        BorderFactory.createEmptyBorder(
+                                12,
+                                12,
+                                12,
+                                12
+                        )
                 )
         );
 
@@ -326,14 +310,21 @@ public class EmergencyManagementPanel
                         "EMERGENCY DETAILS"
                 );
 
-
         formTitle.setFont(
                 Theme.SECTION_FONT
         );
 
-
         formTitle.setForeground(
                 Theme.TEXT
+        );
+
+        formTitle.setBorder(
+                BorderFactory.createEmptyBorder(
+                        0,
+                        3,
+                        10,
+                        3
+                )
         );
 
 
@@ -343,85 +334,76 @@ public class EmergencyManagementPanel
         );
 
 
-        JPanel form =
-                new JPanel(
-                        new GridBagLayout()
-                );
+        JPanel formPanel =
+                new JPanel();
 
+        formPanel.setBackground(
+                Theme.BACKGROUND
+        );
 
-        form.setBackground(
-                Theme.ALMOND_CREAM
+        formPanel.setLayout(
+                new GridBagLayout()
         );
 
 
         GridBagConstraints gbc =
                 new GridBagConstraints();
 
-
         gbc.insets =
                 new Insets(
-                        8,
-                        5,
-                        8,
-                        5
+                        7,
+                        7,
+                        7,
+                        7
                 );
 
+        gbc.anchor =
+                GridBagConstraints.WEST;
 
         gbc.fill =
                 GridBagConstraints.HORIZONTAL;
 
 
-        gbc.anchor =
-                GridBagConstraints.NORTH;
-
-
         // =====================================================
-        // ID
+        // EMERGENCY ID
         // =====================================================
+
+        JLabel idLabel =
+                new JLabel(
+                        "Emergency ID"
+                );
 
         emergencyIdField =
                 new JTextField();
-
-
-        styleTextField(
-                emergencyIdField
-        );
-
 
         emergencyIdField.setEditable(
                 false
         );
 
 
-        emergencyIdField.setBackground(
-                new Color(
-                        0xDDD2C5
-                )
-        );
-
-
         addFormRow(
-                form,
+                formPanel,
                 gbc,
                 0,
-                "Emergency ID",
+                idLabel,
                 emergencyIdField
         );
 
 
         // =====================================================
-        // TYPE
+        // EMERGENCY TYPE
         // =====================================================
+
+        JLabel typeLabel =
+                new JLabel(
+                        "Emergency Type"
+                );
+
 
         typeComboBox =
                 new JComboBox<>(
                         EmergencyType.values()
                 );
-
-
-        styleComboBox(
-                typeComboBox
-        );
 
 
         typeComboBox.addActionListener(
@@ -430,10 +412,10 @@ public class EmergencyManagementPanel
 
 
         addFormRow(
-                form,
+                formPanel,
                 gbc,
                 1,
-                "Emergency Type",
+                typeLabel,
                 typeComboBox
         );
 
@@ -442,27 +424,23 @@ public class EmergencyManagementPanel
         // PRIORITY
         // =====================================================
 
+        JLabel priorityLabel =
+                new JLabel(
+                        "Priority"
+                );
+
+
         priorityComboBox =
                 new JComboBox<>(
                         Priority.values()
                 );
 
 
-        styleComboBox(
-                priorityComboBox
-        );
-
-
-        priorityComboBox.setSelectedItem(
-                Priority.HIGH
-        );
-
-
         addFormRow(
-                form,
+                formPanel,
                 gbc,
                 2,
-                "Priority",
+                priorityLabel,
                 priorityComboBox
         );
 
@@ -471,25 +449,21 @@ public class EmergencyManagementPanel
         // LOCATION
         // =====================================================
 
+        JLabel locationLabel =
+                new JLabel(
+                        "Location"
+                );
+
+
         locationField =
                 new JTextField();
 
 
-        styleTextField(
-                locationField
-        );
-
-
-        locationField.setToolTipText(
-                "Example: Building A, Floor 2, Room 204"
-        );
-
-
         addFormRow(
-                form,
+                formPanel,
                 gbc,
                 3,
-                "Location",
+                locationLabel,
                 locationField
         );
 
@@ -498,32 +472,25 @@ public class EmergencyManagementPanel
         // DATE / TIME
         // =====================================================
 
+        JLabel dateTimeLabel =
+                new JLabel(
+                        "Date / Time"
+                );
+
+
         dateTimeField =
                 new JTextField();
-
-
-        styleTextField(
-                dateTimeField
-        );
-
 
         dateTimeField.setEditable(
                 false
         );
 
 
-        dateTimeField.setBackground(
-                new Color(
-                        0xDDD2C5
-                )
-        );
-
-
         addFormRow(
-                form,
+                formPanel,
                 gbc,
                 4,
-                "Date / Time",
+                dateTimeLabel,
                 dateTimeField
         );
 
@@ -532,16 +499,16 @@ public class EmergencyManagementPanel
         // STATUS
         // =====================================================
 
+        JLabel statusLabel =
+                new JLabel(
+                        "Status"
+                );
+
+
         statusComboBox =
                 new JComboBox<>(
                         EmergencyStatus.values()
                 );
-
-
-        styleComboBox(
-                statusComboBox
-        );
-
 
         statusComboBox.setEnabled(
                 false
@@ -549,10 +516,10 @@ public class EmergencyManagementPanel
 
 
         addFormRow(
-                form,
+                formPanel,
                 gbc,
                 5,
-                "Status",
+                statusLabel,
                 statusComboBox
         );
 
@@ -561,175 +528,78 @@ public class EmergencyManagementPanel
         // DESCRIPTION
         // =====================================================
 
-        descriptionArea =
-                new JTextArea(
-                        6,
-                        20
-                );
-
-
-        descriptionArea.setFont(
-                Theme.NORMAL_FONT
-        );
-
-
-        descriptionArea.setForeground(
-                Theme.TEXT
-        );
-
-
-        descriptionArea.setBackground(
-                Theme.WHITE
-        );
-
-
-        descriptionArea.setLineWrap(
-                true
-        );
-
-
-        descriptionArea.setWrapStyleWord(
-                true
-        );
-
-
-        descriptionArea.setMargin(
-                new Insets(
-                        7,
-                        7,
-                        7,
-                        7
-                )
-        );
-
-
-        descriptionArea.setBorder(
-                BorderFactory.createLineBorder(
-                        Theme.STONE_BROWN
-                )
-        );
-
-
-        JScrollPane descriptionScroll =
-                new JScrollPane(
-                        descriptionArea
-                );
-
-
-        descriptionScroll.setPreferredSize(
-                new Dimension(
-                        220,
-                        135
-                )
-        );
-
-
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.weightx = 0.35;
-        gbc.weighty = 1.0;
-
-
         JLabel descriptionLabel =
                 new JLabel(
                         "Description"
                 );
 
 
-        descriptionLabel.setFont(
-                Theme.SUBTITLE_FONT
+        descriptionArea =
+                new JTextArea(
+                        7,
+                        25
+                );
+
+        descriptionArea.setLineWrap(
+                true
+        );
+
+        descriptionArea.setWrapStyleWord(
+                true
         );
 
 
-        descriptionLabel.setForeground(
-                Theme.TEXT
-        );
+        JScrollPane descriptionScrollPane =
+                new JScrollPane(
+                        descriptionArea
+                );
 
 
-        form.add(
+        gbc.gridx = 0;
+
+        gbc.gridy = 6;
+
+        gbc.weightx = 0;
+
+        gbc.weighty = 1.0;
+
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+
+        formPanel.add(
                 descriptionLabel,
                 gbc
         );
 
 
         gbc.gridx = 1;
-        gbc.weightx = 0.65;
-        gbc.weighty = 1.0;
 
+        gbc.gridy = 6;
+
+        gbc.weightx = 1.0;
+
+        gbc.weighty = 1.0;
 
         gbc.fill =
                 GridBagConstraints.BOTH;
 
 
-        form.add(
-                descriptionScroll,
+        formPanel.add(
+                descriptionScrollPane,
                 gbc
         );
 
 
         outerPanel.add(
-                form,
+                new JScrollPane(
+                        formPanel
+                ),
                 BorderLayout.CENTER
         );
 
 
         return outerPanel;
-    }
-
-
-    // =========================================================
-    // FORM ROW
-    // =========================================================
-
-    private void addFormRow(
-            JPanel panel,
-            GridBagConstraints gbc,
-            int row,
-            String labelText,
-            Component component
-    ) {
-
-        JLabel label =
-                new JLabel(
-                        labelText
-                );
-
-
-        label.setFont(
-                Theme.SUBTITLE_FONT
-        );
-
-
-        label.setForeground(
-                Theme.TEXT
-        );
-
-
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0.35;
-        gbc.weighty = 0;
-
-
-        gbc.fill =
-                GridBagConstraints.HORIZONTAL;
-
-
-        panel.add(
-                label,
-                gbc
-        );
-
-
-        gbc.gridx = 1;
-        gbc.weightx = 0.65;
-
-
-        panel.add(
-                component,
-                gbc
-        );
     }
 
 
@@ -747,24 +617,22 @@ public class EmergencyManagementPanel
                         )
                 );
 
-
         panel.setBackground(
                 Theme.BACKGROUND
         );
 
 
         // =====================================================
-        // SEARCH
+        // SEARCH AREA
         // =====================================================
 
         JPanel searchPanel =
                 new JPanel(
                         new BorderLayout(
-                                8,
+                                10,
                                 0
                         )
                 );
-
 
         searchPanel.setBackground(
                 Theme.BACKGROUND
@@ -776,11 +644,9 @@ public class EmergencyManagementPanel
                         "SEARCH"
                 );
 
-
         searchLabel.setFont(
-                Theme.SUBTITLE_FONT
+                Theme.NORMAL_FONT
         );
-
 
         searchLabel.setForeground(
                 Theme.TEXT
@@ -791,16 +657,10 @@ public class EmergencyManagementPanel
                 new JTextField();
 
 
-        styleTextField(
-                searchField
-        );
-
-
         JButton searchButton =
                 new JButton(
                         "SEARCH"
                 );
-
 
         Theme.stylePrimaryButton(
                 searchButton
@@ -812,27 +672,8 @@ public class EmergencyManagementPanel
                         "CLEAR"
                 );
 
-
         Theme.styleSecondaryButton(
                 clearSearchButton
-        );
-
-
-        searchButton.addActionListener(
-                e -> searchEmergencies()
-        );
-
-
-        clearSearchButton.addActionListener(
-                e -> {
-
-                    searchField.setText(
-                            ""
-                    );
-
-
-                    loadEmergencies();
-                }
         );
 
 
@@ -852,11 +693,10 @@ public class EmergencyManagementPanel
                 new JPanel(
                         new FlowLayout(
                                 FlowLayout.RIGHT,
-                                5,
+                                8,
                                 0
                         )
                 );
-
 
         searchButtons.setBackground(
                 Theme.BACKGROUND
@@ -866,7 +706,6 @@ public class EmergencyManagementPanel
         searchButtons.add(
                 searchButton
         );
-
 
         searchButtons.add(
                 clearSearchButton
@@ -892,11 +731,17 @@ public class EmergencyManagementPanel
         String[] columns = {
 
                 "Emergency ID",
+
                 "Type",
+
                 "Priority",
+
                 "Location",
+
                 "Status",
+
                 "Assigned Team",
+
                 "Date / Time"
         };
 
@@ -924,43 +769,242 @@ public class EmergencyManagementPanel
                 );
 
 
-        styleTable(
-                emergencyTable
+        emergencyTable.setRowHeight(
+                29
         );
 
+
+        emergencyTable.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
+
+
+        emergencyTable.setAutoResizeMode(
+                JTable.AUTO_RESIZE_LAST_COLUMN
+        );
+
+
+        emergencyTable.setFillsViewportHeight(
+                true
+        );
+
+
+        emergencyTable.setFont(
+                Theme.NORMAL_FONT
+        );
+
+
+        emergencyTable.getTableHeader()
+                .setFont(
+                        Theme.NORMAL_FONT
+                );
+
+
+        emergencyTable.getTableHeader()
+                .setBackground(
+                        Theme.SIDEBAR
+                );
+
+
+        emergencyTable.getTableHeader()
+                .setForeground(
+                        Theme.LIGHT_TEXT
+                );
+
+
+        emergencyTable.getTableHeader()
+                .setReorderingAllowed(
+                        false
+                );
+
+
+        emergencyTable.setGridColor(
+                Theme.KHAKI_BEIGE
+        );
+
+
+        emergencyTable.setSelectionBackground(
+                Theme.KHAKI_BEIGE
+        );
+
+
+        emergencyTable.setSelectionForeground(
+                Theme.BLACK
+        );
+
+
+        // =====================================================
+        // TABLE COLUMN WIDTHS
+        // =====================================================
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(0)
+                .setPreferredWidth(
+                        115
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(1)
+                .setPreferredWidth(
+                        110
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(2)
+                .setPreferredWidth(
+                        95
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(3)
+                .setPreferredWidth(
+                        150
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(4)
+                .setPreferredWidth(
+                        105
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(5)
+                .setPreferredWidth(
+                        110
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(6)
+                .setPreferredWidth(
+                        130
+                );
+
+
+        // =====================================================
+        // CENTER ALIGNMENT
+        // =====================================================
+
+        DefaultTableCellRenderer centerRenderer =
+                new DefaultTableCellRenderer();
+
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(0)
+                .setCellRenderer(
+                        centerRenderer
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(2)
+                .setCellRenderer(
+                        centerRenderer
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(4)
+                .setCellRenderer(
+                        centerRenderer
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(5)
+                .setCellRenderer(
+                        centerRenderer
+                );
+
+
+        emergencyTable
+                .getColumnModel()
+                .getColumn(6)
+                .setCellRenderer(
+                        centerRenderer
+                );
+
+
+        JScrollPane tableScrollPane =
+                new JScrollPane(
+                        emergencyTable
+                );
+
+
+        tableScrollPane.setBorder(
+                BorderFactory.createLineBorder(
+                        Theme.KHAKI_BEIGE
+                )
+        );
+
+
+        panel.add(
+                tableScrollPane,
+                BorderLayout.CENTER
+        );
+
+
+        // =====================================================
+        // SEARCH ACTIONS
+        // =====================================================
+
+        searchButton.addActionListener(
+                e -> searchEmergencies()
+        );
+
+
+        searchField.addActionListener(
+                e -> searchEmergencies()
+        );
+
+
+        clearSearchButton.addActionListener(
+                e -> {
+
+                    searchField.setText(
+                            ""
+                    );
+
+                    loadEmergencies();
+                }
+        );
+
+
+        // =====================================================
+        // TABLE ROW SELECTION
+        // =====================================================
 
         emergencyTable
                 .getSelectionModel()
                 .addListSelectionListener(
                         e -> {
 
-                            if (
-                                    !e.getValueIsAdjusting()
-                            ) {
+                            if (!e.getValueIsAdjusting()) {
 
-                                selectEmergency();
+                                loadSelectedEmergency();
                             }
                         }
                 );
-
-
-        JScrollPane tableScroll =
-                new JScrollPane(
-                        emergencyTable
-                );
-
-
-        tableScroll.setBorder(
-                BorderFactory.createLineBorder(
-                        Theme.STONE_BROWN
-                )
-        );
-
-
-        panel.add(
-                tableScroll,
-                BorderLayout.CENTER
-        );
 
 
         return panel;
@@ -968,69 +1012,199 @@ public class EmergencyManagementPanel
 
 
     // =========================================================
-    // ACTION BAR
+    // BOTTOM ACTION PANEL
     // =========================================================
 
-    private JPanel createActionBar() {
+    private JPanel createBottomActionPanel() {
 
-        JPanel panel =
+        JPanel wrapper =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        wrapper.setBackground(
+                Theme.BACKGROUND
+        );
+
+        wrapper.setBorder(
+                BorderFactory.createEmptyBorder(
+                        0,
+                        20,
+                        15,
+                        20
+                )
+        );
+
+
+        // =====================================================
+        // CRUD ROW
+        // =====================================================
+
+        JPanel crudPanel =
                 new JPanel(
                         new FlowLayout(
                                 FlowLayout.RIGHT,
-                                8,
-                                0
+                                10,
+                                5
                         )
                 );
 
-
-        panel.setBackground(
+        crudPanel.setBackground(
                 Theme.BACKGROUND
         );
 
 
-        JButton addButton =
+        addButton =
                 new JButton(
                         "ADD"
                 );
-
 
         Theme.stylePrimaryButton(
                 addButton
         );
 
 
-        JButton updateButton =
+        updateButton =
                 new JButton(
                         "UPDATE"
                 );
-
 
         Theme.styleSecondaryButton(
                 updateButton
         );
 
 
-        JButton deleteButton =
+        deleteButton =
                 new JButton(
                         "DELETE"
                 );
-
 
         Theme.styleDangerButton(
                 deleteButton
         );
 
 
-        JButton clearButton =
+        clearFormButton =
                 new JButton(
                         "CLEAR FORM"
                 );
 
-
         Theme.styleSecondaryButton(
-                clearButton
+                clearFormButton
         );
 
+
+        crudPanel.add(
+                addButton
+        );
+
+        crudPanel.add(
+                updateButton
+        );
+
+        crudPanel.add(
+                deleteButton
+        );
+
+        crudPanel.add(
+                clearFormButton
+        );
+
+
+        wrapper.add(
+                crudPanel,
+                BorderLayout.NORTH
+        );
+
+
+        // =====================================================
+        // WORKFLOW ROW
+        // =====================================================
+
+        JPanel workflowPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                10,
+                                5
+                        )
+                );
+
+        workflowPanel.setBackground(
+                Theme.BACKGROUND
+        );
+
+
+        JLabel workflowLabel =
+                new JLabel(
+                        "RESPONSE WORKFLOW:"
+                );
+
+        workflowLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        workflowLabel.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+
+        startResponseButton =
+                new JButton(
+                        "START RESPONSE"
+                );
+
+        Theme.stylePrimaryButton(
+                startResponseButton
+        );
+
+
+        resolveButton =
+                new JButton(
+                        "RESOLVE"
+                );
+
+        Theme.stylePrimaryButton(
+                resolveButton
+        );
+
+
+        cancelEmergencyButton =
+                new JButton(
+                        "CANCEL EMERGENCY"
+                );
+
+        Theme.styleDangerButton(
+                cancelEmergencyButton
+        );
+
+
+        workflowPanel.add(
+                workflowLabel
+        );
+
+        workflowPanel.add(
+                startResponseButton
+        );
+
+        workflowPanel.add(
+                resolveButton
+        );
+
+        workflowPanel.add(
+                cancelEmergencyButton
+        );
+
+
+        wrapper.add(
+                workflowPanel,
+                BorderLayout.CENTER
+        );
+
+
+        // =====================================================
+        // BUTTON ACTIONS
+        // =====================================================
 
         addButton.addActionListener(
                 e -> addEmergency()
@@ -1047,71 +1221,30 @@ public class EmergencyManagementPanel
         );
 
 
-        clearButton.addActionListener(
+        clearFormButton.addActionListener(
                 e -> clearForm()
         );
 
 
-        panel.add(
-                addButton
+        startResponseButton.addActionListener(
+                e -> startResponse()
         );
 
 
-        panel.add(
-                updateButton
+        resolveButton.addActionListener(
+                e -> resolveEmergency()
         );
 
 
-        panel.add(
-                deleteButton
+        cancelEmergencyButton.addActionListener(
+                e -> cancelEmergency()
         );
 
 
-        panel.add(
-                clearButton
-        );
+        updateWorkflowButtons();
 
 
-        return panel;
-    }
-
-
-    // =========================================================
-    // UPDATE GENERATED ID
-    // =========================================================
-
-    private void updateGeneratedId() {
-
-        /*
-         * Do not change the ID while an existing row is selected.
-         */
-        if (
-                emergencyTable != null
-                        &&
-                        emergencyTable.getSelectedRow() >= 0
-        ) {
-
-            return;
-        }
-
-
-        EmergencyType selectedType =
-                (EmergencyType)
-                        typeComboBox
-                                .getSelectedItem();
-
-
-        if (selectedType == null) {
-            return;
-        }
-
-
-        emergencyIdField.setText(
-                emergencyManager
-                        .generateEmergencyId(
-                                selectedType
-                        )
-        );
+        return wrapper;
     }
 
 
@@ -1145,84 +1278,80 @@ public class EmergencyManagementPanel
                         .trim();
 
 
-        String dateTime =
-                dateTimeField
-                        .getText()
-                        .trim();
+        if (type == null) {
 
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an emergency type.",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
+            );
 
-        if (
-                type == null
-                        ||
-                        priority == null
-                        ||
-                        location.isEmpty()
-                        ||
-                        description.isEmpty()
-        ) {
-
-            if (type == null) {
-
-                showValidationMessage(
-                        "Please select an emergency type."
-                );
-
-                return;
-            }
-
-
-            if (priority == null) {
-
-                showValidationMessage(
-                        "Please select a priority."
-                );
-
-                return;
-            }
-
-
-            if (location.isEmpty()) {
-
-                showValidationMessage(
-                        "Location is required."
-                );
-
-                locationField.requestFocus();
-
-                return;
-            }
-
-
-            if (description.isEmpty()) {
-
-                showValidationMessage(
-                        "Description is required."
-                );
-
-                descriptionArea.requestFocus();
-
-                return;
-            }
+            return;
         }
 
 
-        /*
-         * Date/time is generated automatically.
-         */
-        dateTime =
-                getCurrentDateTime();
+        if (priority == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a priority.",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
 
 
-        String generatedId =
+        if (location.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter the emergency location.",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            locationField.requestFocus();
+
+            return;
+        }
+
+
+        if (description.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter the emergency description.",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            descriptionArea.requestFocus();
+
+            return;
+        }
+
+
+        String emergencyId =
                 emergencyManager
                         .generateEmergencyId(
                                 type
                         );
 
 
+        String dateTime =
+                new SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm"
+                ).format(
+                        new Date()
+                );
+
+
         Emergency emergency =
                 new Emergency(
-                        generatedId,
+                        emergencyId,
                         type,
                         priority,
                         location,
@@ -1231,17 +1360,18 @@ public class EmergencyManagementPanel
                 );
 
 
-        boolean success =
+        boolean added =
                 emergencyManager.addEmergency(
                         emergency
                 );
 
 
-        if (!success) {
+        if (!added) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Emergency could not be added.",
+                    "Emergency could not be added.\n"
+                            + "The generated ID may already exist.",
                     "Add Failed",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -1250,74 +1380,108 @@ public class EmergencyManagementPanel
         }
 
 
-        String message =
-                "Emergency added successfully."
-                        + "\nEmergency ID: "
-                        + generatedId;
+        // =====================================================
+        // AUTOMATIC CRITICAL ASSIGNMENT
+        // =====================================================
+
+        boolean automaticallyAssigned =
+                false;
+
+        String assignedTeamId =
+                null;
 
 
-        /*
-         * Automatic assignment for CRITICAL emergencies.
-         */
         if (
                 priority == Priority.CRITICAL
-                        &&
-                        assignmentManager != null
+                        && assignmentManager != null
+                        && teamManager != null
         ) {
 
             ArrayList<ResponseTeam> suitableTeams =
-                    teamManager
-                            .findSuitableTeams(
-                                    type
-                            );
+                    teamManager.findSuitableTeams(
+                            emergency.getType()
+                    );
 
 
-            if (
-                    !suitableTeams.isEmpty()
-            ) {
+            if (!suitableTeams.isEmpty()) {
 
-                ResponseTeam selectedTeam =
+                ResponseTeam team =
                         suitableTeams.get(0);
 
 
-                AssignmentManagerResult:
-                {
-                    String assignmentId =
-                            assignmentManager
-                                    .generateAssignmentId();
+                Assignment createdAssignment =
+                        assignmentManager.assignTeam(
+                                emergencyId,
+                                team.getTeamId(),
+                                dateTime,
+                                ""
+                        );
 
+                automaticallyAssigned =
+                        createdAssignment != null;
 
-                    model.Assignment assignment =
-                            assignmentManager.assignTeam(
-                                    emergency.getEmergencyId(),
-                                    selectedTeam.getTeamId(),
-                                    dateTime,
-                                    "Automatically assigned because priority is CRITICAL."
-                            );
+                if (automaticallyAssigned) {
 
+                    assignedTeamId =
+                            team.getTeamId();
 
-                    if (assignment != null) {
-
-                        message =
-                                message
-                                        + "\n\n"
-                                        + "Critical emergency detected."
-                                        + "\n"
-                                        + "Team automatically assigned: "
-                                        + selectedTeam.getTeamName()
-                                        + "\nAssignment ID: "
-                                        + assignment.getAssignmentId();
-                    }
 
                 }
-            } else {
-
-                message =
-                        message
-                                + "\n\n"
-                                + "No suitable team is currently available."
-                                + "\nEmergency remains PENDING.";
             }
+        }
+
+
+        if (automaticallyAssigned) {
+
+            emergencyManager.saveData();
+
+            teamManager.saveData();
+
+        } else {
+
+            emergencyManager.saveData();
+        }
+        // =====================================================
+        // RESULT MESSAGE
+        // =====================================================
+
+        String message;
+
+        if (automaticallyAssigned) {
+
+            message =
+                    "Emergency added successfully.\n\n"
+                            + "Emergency ID: "
+                            + emergencyId
+                            + "\n"
+                            + "Priority: "
+                            + priority
+                            + "\n"
+                            + "Automatically Assigned Team: "
+                            + assignedTeamId
+                            + "\n"
+                            + "Status: ASSIGNED";
+
+        } else if (
+                priority == Priority.CRITICAL
+        ) {
+
+            message =
+                    "Critical emergency added successfully.\n\n"
+                            + "Emergency ID: "
+                            + emergencyId
+                            + "\n"
+                            + "No suitable available team was found.\n"
+                            + "Status: PENDING";
+
+        } else {
+
+            message =
+                    "Emergency added successfully.\n\n"
+                            + "Emergency ID: "
+                            + emergencyId
+                            + "\n"
+                            + "Status: PENDING";
         }
 
 
@@ -1329,9 +1493,9 @@ public class EmergencyManagementPanel
         );
 
 
-        loadEmergencies();
-
         clearForm();
+
+        loadEmergencies();
     }
 
 
@@ -1341,145 +1505,153 @@ public class EmergencyManagementPanel
 
     private void updateEmergency() {
 
-        String id =
-                emergencyIdField
-                        .getText()
-                        .trim();
+        if (selectedEmergency == null) {
 
-
-        if (id.isEmpty()) {
-
-            showValidationMessage(
-                    "Select an emergency from the table first."
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an emergency first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
 
-        EmergencyType type =
+        EmergencyStatus currentStatus =
+                selectedEmergency.getStatus();
+
+
+        if (
+                currentStatus == EmergencyStatus.RESOLVED
+                        || currentStatus == EmergencyStatus.CANCELLED
+        ) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Resolved or cancelled emergencies cannot be edited.",
+                    "Update Not Allowed",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        EmergencyType newType =
                 (EmergencyType)
                         typeComboBox
                                 .getSelectedItem();
 
 
-        Priority priority =
+        Priority newPriority =
                 (Priority)
                         priorityComboBox
                                 .getSelectedItem();
 
 
-        String location =
+        String newLocation =
                 locationField
                         .getText()
                         .trim();
 
 
-        String description =
+        String newDescription =
                 descriptionArea
                         .getText()
                         .trim();
 
 
-        String dateTime =
-                dateTimeField
-                        .getText()
-                        .trim();
-
-
-        if (
-                type == null
-                        ||
-                        priority == null
-                        ||
-                        location.isEmpty()
-                        ||
-                        description.isEmpty()
-        ) {
-
-            if (type == null) {
-
-                showValidationMessage(
-                        "Please select an emergency type."
-                );
-
-                return;
-            }
-
-
-            if (priority == null) {
-
-                showValidationMessage(
-                        "Please select a priority."
-                );
-
-                return;
-            }
-
-
-            if (location.isEmpty()) {
-
-                showValidationMessage(
-                        "Location is required."
-                );
-
-                return;
-            }
-
-
-            if (description.isEmpty()) {
-
-                showValidationMessage(
-                        "Description is required."
-                );
-
-                return;
-            }
-        }
-
-
-        Emergency updatedEmergency =
-                new Emergency(
-                        id,
-                        type,
-                        priority,
-                        location,
-                        description,
-                        dateTime
-                );
-
-
-        boolean success =
-                emergencyManager.updateEmergency(
-                        id,
-                        updatedEmergency
-                );
-
-
-        if (!success) {
+        if (newType == null) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Emergency could not be updated.",
-                    "Update Failed",
-                    JOptionPane.ERROR_MESSAGE
+                    "Please select an emergency type.",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
 
+        if (newPriority == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a priority.",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        if (newLocation.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter the emergency location.",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        if (newDescription.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter the emergency description.",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        // =====================================================
+        // UPDATE MODEL
+        // =====================================================
+
+        selectedEmergency.setType(
+                newType
+        );
+
+        selectedEmergency.setPriority(
+                newPriority
+        );
+
+        selectedEmergency.setLocation(
+                newLocation
+        );
+
+        selectedEmergency.setDescription(
+                newDescription
+        );
+
+
+        emergencyManager.saveData();
+
+
         JOptionPane.showMessageDialog(
                 this,
                 "Emergency updated successfully.",
-                "Success",
+                "Update Successful",
                 JOptionPane.INFORMATION_MESSAGE
         );
 
 
         loadEmergencies();
 
-        clearForm();
+
+        selectEmergencyInTable(
+                selectedEmergency.getEmergencyId()
+        );
     }
 
 
@@ -1489,16 +1661,33 @@ public class EmergencyManagementPanel
 
     private void deleteEmergency() {
 
-        String id =
-                emergencyIdField
-                        .getText()
-                        .trim();
+        if (selectedEmergency == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an emergency first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
 
 
-        if (id.isEmpty()) {
+        EmergencyStatus status =
+                selectedEmergency.getStatus();
 
-            showValidationMessage(
-                    "Select an emergency from the table first."
+
+        if (
+                status == EmergencyStatus.ASSIGNED
+                        || status == EmergencyStatus.IN_PROGRESS
+        ) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "This emergency cannot be deleted while response work is active.",
+                    "Delete Not Allowed",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
@@ -1508,39 +1697,98 @@ public class EmergencyManagementPanel
         int result =
                 JOptionPane.showConfirmDialog(
                         this,
-                        "Are you sure you want to delete\n"
-                                + "Emergency: "
-                                + id
+                        "Are you sure you want to delete emergency "
+                                + selectedEmergency.getEmergencyId()
                                 + "?",
-                        "Confirm Delete",
+                        "Delete Confirmation",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE
                 );
 
 
         if (
-                result
-                        != JOptionPane.YES_OPTION
+                result != JOptionPane.YES_OPTION
         ) {
 
             return;
         }
 
 
-        boolean success =
-                emergencyManager.removeEmergency(
-                        id
-                );
+        String emergencyId =
+                selectedEmergency
+                        .getEmergencyId();
 
 
-        if (!success) {
+        emergencyManager.removeEmergency(
+                emergencyId
+        );
+
+
+        emergencyManager.saveData();
+
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Emergency deleted successfully.",
+                "Delete Successful",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+
+        clearForm();
+
+        loadEmergencies();
+    }
+
+
+    // =========================================================
+    // START RESPONSE
+    // =========================================================
+
+    private void startResponse() {
+
+        if (selectedEmergency == null) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "This emergency cannot be deleted."
-                            + "\nActive assigned or in-progress "
-                            + "emergencies cannot be removed.",
-                    "Delete Failed",
+                    "Please select an emergency first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        if (
+                selectedEmergency.getStatus()
+                        != EmergencyStatus.ASSIGNED
+        ) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Only assigned emergencies can be started.",
+                    "Action Not Allowed",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        boolean updated =
+                emergencyManager.updateEmergencyStatus(
+                        selectedEmergency.getEmergencyId(),
+                        EmergencyStatus.IN_PROGRESS
+                );
+
+
+        if (!updated) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "The response could not be started.",
+                    "Update Failed",
                     JOptionPane.ERROR_MESSAGE
             );
 
@@ -1548,22 +1796,341 @@ public class EmergencyManagementPanel
         }
 
 
+        saveAllRelatedData();
+
+
         JOptionPane.showMessageDialog(
                 this,
-                "Emergency deleted successfully.",
-                "Success",
+                "Emergency response has started.\n\n"
+                        + "Emergency: "
+                        + selectedEmergency.getEmergencyId()
+                        + "\n"
+                        + "Status: IN PROGRESS",
+                "Response Started",
                 JOptionPane.INFORMATION_MESSAGE
         );
 
 
-        loadEmergencies();
-
-        clearForm();
+        refreshAfterWorkflowChange();
     }
 
 
     // =========================================================
-    // SEARCH
+    // RESOLVE EMERGENCY
+    // =========================================================
+
+    private void resolveEmergency() {
+
+        if (selectedEmergency == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an emergency first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        if (
+                selectedEmergency.getStatus()
+                        != EmergencyStatus.IN_PROGRESS
+        ) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Only an emergency that is IN PROGRESS can be resolved.",
+                    "Action Not Allowed",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        int result =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        "Mark emergency "
+                                + selectedEmergency.getEmergencyId()
+                                + " as RESOLVED?",
+                        "Resolve Emergency",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                );
+
+
+        if (
+                result != JOptionPane.YES_OPTION
+        ) {
+
+            return;
+        }
+
+
+        boolean updated =
+                emergencyManager.updateEmergencyStatus(
+                        selectedEmergency.getEmergencyId(),
+                        EmergencyStatus.RESOLVED
+                );
+
+
+        if (!updated) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "The emergency could not be resolved.",
+                    "Resolve Failed",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            return;
+        }
+
+
+        /*
+         * RESOLVED status also releases the assigned team
+         * inside EmergencyManager.
+         *
+         * saveAllRelatedData() persists:
+         * - emergency
+         * - team
+         * - assignment
+         */
+        saveAllRelatedData();
+
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Emergency resolved successfully.\n\n"
+                        + "Emergency: "
+                        + selectedEmergency.getEmergencyId()
+                        + "\n"
+                        + "Status: RESOLVED\n"
+                        + "Assigned team is now AVAILABLE.",
+                "Emergency Resolved",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+
+        refreshAfterWorkflowChange();
+    }
+
+
+    // =========================================================
+    // CANCEL EMERGENCY
+    // =========================================================
+
+    private void cancelEmergency() {
+
+        if (selectedEmergency == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an emergency first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        EmergencyStatus status =
+                selectedEmergency.getStatus();
+
+
+        if (
+                status == EmergencyStatus.RESOLVED
+                        || status == EmergencyStatus.CANCELLED
+        ) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "This emergency can no longer be cancelled.",
+                    "Action Not Allowed",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        int result =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        "Cancel emergency "
+                                + selectedEmergency.getEmergencyId()
+                                + "?",
+                        "Cancel Emergency",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+
+        if (
+                result != JOptionPane.YES_OPTION
+        ) {
+
+            return;
+        }
+
+
+        boolean updated =
+                emergencyManager.updateEmergencyStatus(
+                        selectedEmergency.getEmergencyId(),
+                        EmergencyStatus.CANCELLED
+                );
+
+
+        if (!updated) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "The emergency could not be cancelled.",
+                    "Cancel Failed",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            return;
+        }
+
+
+        saveAllRelatedData();
+
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Emergency cancelled successfully.",
+                "Emergency Cancelled",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+
+        refreshAfterWorkflowChange();
+    }
+
+
+    // =========================================================
+    // SAVE ALL RELATED DATA
+    // =========================================================
+
+    private void saveAllRelatedData() {
+
+        emergencyManager.saveData();
+
+        if (teamManager != null) {
+            teamManager.saveData();
+        }
+    }
+
+
+    // =========================================================
+    // REFRESH AFTER WORKFLOW
+    // =========================================================
+
+    private void refreshAfterWorkflowChange() {
+
+        String emergencyId =
+                selectedEmergency != null
+                        ? selectedEmergency.getEmergencyId()
+                        : null;
+
+
+        loadEmergencies();
+
+
+        if (emergencyId != null) {
+
+            selectEmergencyInTable(
+                    emergencyId
+            );
+        }
+    }
+
+
+    // =========================================================
+    // LOAD TABLE
+    // =========================================================
+
+    public void loadEmergencies() {
+
+        displayEmergencies(
+                emergencyManager
+                        .getAllEmergencies()
+        );
+    }
+
+
+    // =========================================================
+    // DISPLAY EMERGENCIES
+    // =========================================================
+
+    private void displayEmergencies(
+            ArrayList<Emergency> emergencies
+    ) {
+
+        tableModel.setRowCount(
+                0
+        );
+
+        selectedEmergency =
+                null;
+
+        updateWorkflowButtons();
+
+
+        for (
+                Emergency emergency :
+                emergencies
+        ) {
+
+            String assignedTeam =
+                    emergency.getAssignedTeamId();
+
+
+            if (
+                    assignedTeam == null
+                            || assignedTeam.trim().isEmpty()
+            ) {
+
+                assignedTeam =
+                        "-";
+            }
+
+
+            tableModel.addRow(
+                    new Object[]{
+
+                            emergency.getEmergencyId(),
+
+                            formatEmergencyType(
+                                    emergency.getType()
+                            ),
+
+                            formatPriority(
+                                    emergency.getPriority()
+                            ),
+
+                            emergency.getLocation(),
+
+                            formatStatus(
+                                    emergency.getStatus()
+                            ),
+
+                            assignedTeam,
+
+                            emergency.getDateTime()
+                    }
+            );
+        }
+    }
+
+
+    // =========================================================
+    // SEARCH EMERGENCIES
     // =========================================================
 
     private void searchEmergencies() {
@@ -1571,7 +2138,8 @@ public class EmergencyManagementPanel
         String keyword =
                 searchField
                         .getText()
-                        .trim();
+                        .trim()
+                        .toLowerCase();
 
 
         if (keyword.isEmpty()) {
@@ -1583,90 +2151,105 @@ public class EmergencyManagementPanel
 
 
         ArrayList<Emergency> results =
-                emergencyManager
-                        .searchEmergencies(
-                                keyword
-                        );
-
-
-        loadTable(
-                results
-        );
-    }
-
-
-    // =========================================================
-    // LOAD EMERGENCIES
-    // =========================================================
-
-    public void loadEmergencies() {
-
-        loadTable(
-                emergencyManager
-                        .getAllEmergencies()
-        );
-    }
-
-
-    // =========================================================
-    // LOAD TABLE
-    // =========================================================
-
-    private void loadTable(
-            ArrayList<Emergency> emergencies
-    ) {
-
-        tableModel.setRowCount(
-                0
-        );
+                new ArrayList<>();
 
 
         for (
-                Emergency emergency
-                : emergencies
+                Emergency emergency :
+                emergencyManager.getAllEmergencies()
         ) {
 
             String assignedTeam =
                     emergency.getAssignedTeamId();
 
 
-            if (
-                    assignedTeam == null
-                            ||
-                            assignedTeam.trim().isEmpty()
-            ) {
-
-                assignedTeam = "-";
+            if (assignedTeam == null) {
+                assignedTeam = "";
             }
 
 
-            tableModel.addRow(
-                    new Object[]{
+            boolean matches =
+                    contains(
                             emergency.getEmergencyId(),
-                            emergency.getType(),
-                            emergency.getPriority(),
+                            keyword
+                    )
+                            || contains(
                             emergency.getLocation(),
-                            emergency.getStatus(),
+                            keyword
+                    )
+                            || contains(
+                            emergency.getDescription(),
+                            keyword
+                    )
+                            || contains(
+                            formatEmergencyType(
+                                    emergency.getType()
+                            ),
+                            keyword
+                    )
+                            || contains(
+                            formatPriority(
+                                    emergency.getPriority()
+                            ),
+                            keyword
+                    )
+                            || contains(
+                            formatStatus(
+                                    emergency.getStatus()
+                            ),
+                            keyword
+                    )
+                            || contains(
                             assignedTeam,
-                            emergency.getDateTime()
-                    }
+                            keyword
+                    );
+
+
+            if (matches) {
+
+                results.add(
+                        emergency
+                );
+            }
+        }
+
+
+        displayEmergencies(
+                results
+        );
+
+
+        if (
+                results.isEmpty()
+        ) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No matching emergency was found.",
+                    "Search Result",
+                    JOptionPane.INFORMATION_MESSAGE
             );
         }
     }
 
 
     // =========================================================
-    // SELECT EMERGENCY
+    // LOAD SELECTED EMERGENCY
     // =========================================================
 
-    private void selectEmergency() {
+    private void loadSelectedEmergency() {
 
         int selectedRow =
-                emergencyTable
-                        .getSelectedRow();
+                emergencyTable.getSelectedRow();
 
 
         if (selectedRow < 0) {
+
+            selectedEmergency =
+                    null;
+
+            updateWorkflowButtons();
+
             return;
         }
 
@@ -1680,51 +2263,199 @@ public class EmergencyManagementPanel
                         .toString();
 
 
-        Emergency emergency =
+        selectedEmergency =
                 emergencyManager
                         .findEmergencyById(
                                 emergencyId
                         );
 
 
-        if (emergency == null) {
+        if (
+                selectedEmergency == null
+        ) {
+
             return;
         }
 
 
         emergencyIdField.setText(
-                emergency.getEmergencyId()
+                selectedEmergency
+                        .getEmergencyId()
         );
 
 
         typeComboBox.setSelectedItem(
-                emergency.getType()
+                selectedEmergency
+                        .getType()
         );
 
 
         priorityComboBox.setSelectedItem(
-                emergency.getPriority()
+                selectedEmergency
+                        .getPriority()
         );
 
 
         locationField.setText(
-                emergency.getLocation()
-        );
-
-
-        descriptionArea.setText(
-                emergency.getDescription()
+                selectedEmergency
+                        .getLocation()
         );
 
 
         dateTimeField.setText(
-                emergency.getDateTime()
+                selectedEmergency
+                        .getDateTime()
         );
 
 
         statusComboBox.setSelectedItem(
-                emergency.getStatus()
+                selectedEmergency
+                        .getStatus()
         );
+
+
+        descriptionArea.setText(
+                selectedEmergency
+                        .getDescription()
+        );
+
+
+        updateGeneratedIdDisplay();
+
+        updateWorkflowButtons();
+    }
+
+
+    // =========================================================
+    // SELECT ROW BY ID
+    // =========================================================
+
+    private void selectEmergencyInTable(
+            String emergencyId
+    ) {
+
+        if (emergencyId == null) {
+            return;
+        }
+
+
+        for (
+                int i = 0;
+                i < tableModel.getRowCount();
+                i++
+        ) {
+
+            String tableId =
+                    tableModel
+                            .getValueAt(
+                                    i,
+                                    0
+                            )
+                            .toString();
+
+
+            if (
+                    tableId.equalsIgnoreCase(
+                            emergencyId
+                    )
+            ) {
+
+                emergencyTable
+                        .setRowSelectionInterval(
+                                i,
+                                i
+                        );
+
+                emergencyTable
+                        .scrollRectToVisible(
+                                emergencyTable
+                                        .getCellRect(
+                                                i,
+                                                0,
+                                                true
+                                        )
+                        );
+
+                break;
+            }
+        }
+    }
+
+
+    // =========================================================
+    // UPDATE GENERATED ID
+    // =========================================================
+
+    private void updateGeneratedId() {
+
+        if (
+                selectedEmergency != null
+                        && emergencyTable
+                        .getSelectedRow() >= 0
+        ) {
+
+            return;
+        }
+
+
+        EmergencyType type =
+                (EmergencyType)
+                        typeComboBox
+                                .getSelectedItem();
+
+
+        if (type == null) {
+
+            emergencyIdField.setText(
+                    ""
+            );
+
+            return;
+        }
+
+
+        String generatedId =
+                emergencyManager
+                        .generateEmergencyId(
+                                type
+                        );
+
+
+        emergencyIdField.setText(
+                generatedId
+        );
+
+
+        dateTimeField.setText(
+                new SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm"
+                ).format(
+                        new Date()
+                )
+        );
+
+
+        statusComboBox.setSelectedItem(
+                EmergencyStatus.PENDING
+        );
+    }
+
+
+    // =========================================================
+    // KEEP ID WHEN EXISTING RECORD IS SELECTED
+    // =========================================================
+
+    private void updateGeneratedIdDisplay() {
+
+        if (
+                selectedEmergency != null
+        ) {
+
+            emergencyIdField.setText(
+                    selectedEmergency
+                            .getEmergencyId()
+            );
+        }
     }
 
 
@@ -1734,6 +2465,10 @@ public class EmergencyManagementPanel
 
     private void clearForm() {
 
+        selectedEmergency =
+                null;
+
+
         emergencyTable.clearSelection();
 
 
@@ -1742,8 +2477,8 @@ public class EmergencyManagementPanel
         );
 
 
-        priorityComboBox.setSelectedItem(
-                Priority.HIGH
+        priorityComboBox.setSelectedIndex(
+                0
         );
 
 
@@ -1757,192 +2492,308 @@ public class EmergencyManagementPanel
         );
 
 
-        dateTimeField.setText(
-                getCurrentDateTime()
+        statusComboBox.setSelectedItem(
+                EmergencyStatus.PENDING
         );
 
 
-        statusComboBox.setSelectedItem(
-                EmergencyStatus.PENDING
+        dateTimeField.setText(
+                new SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm"
+                ).format(
+                        new Date()
+                )
         );
 
 
         updateGeneratedId();
 
 
-        emergencyIdField.requestFocus();
+        updateWorkflowButtons();
     }
 
 
     // =========================================================
-    // CURRENT DATE / TIME
+    // WORKFLOW BUTTON STATES
     // =========================================================
 
-    private String getCurrentDateTime() {
+    private void updateWorkflowButtons() {
 
-        DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd HH:mm"
-                );
+        if (
+                startResponseButton == null
+                        || resolveButton == null
+                        || cancelEmergencyButton == null
+        ) {
+
+            return;
+        }
 
 
-        return LocalDateTime
-                .now()
-                .format(
-                        formatter
-                );
+        startResponseButton.setEnabled(
+                false
+        );
+
+
+        resolveButton.setEnabled(
+                false
+        );
+
+
+        cancelEmergencyButton.setEnabled(
+                false
+        );
+
+
+        if (
+                selectedEmergency == null
+        ) {
+
+            return;
+        }
+
+
+        EmergencyStatus status =
+                selectedEmergency.getStatus();
+
+
+        if (
+                status == EmergencyStatus.ASSIGNED
+        ) {
+
+            startResponseButton.setEnabled(
+                    true
+            );
+
+
+            cancelEmergencyButton.setEnabled(
+                    true
+            );
+        }
+
+
+        else if (
+                status == EmergencyStatus.IN_PROGRESS
+        ) {
+
+            resolveButton.setEnabled(
+                    true
+            );
+
+
+            cancelEmergencyButton.setEnabled(
+                    true
+            );
+        }
+
+
+        else if (
+                status == EmergencyStatus.PENDING
+        ) {
+
+            cancelEmergencyButton.setEnabled(
+                    true
+            );
+        }
     }
 
 
     // =========================================================
-    // VALIDATION MESSAGE
+    // FORM ROW HELPER
     // =========================================================
 
-    private void showValidationMessage(
-            String message
+    private void addFormRow(
+            JPanel panel,
+            GridBagConstraints gbc,
+            int row,
+            JLabel label,
+            JComponent component
     ) {
 
-        JOptionPane.showMessageDialog(
-                this,
-                message,
-                "Validation Error",
-                JOptionPane.WARNING_MESSAGE
+        gbc.gridx = 0;
+
+        gbc.gridy = row;
+
+        gbc.weightx = 0.0;
+
+        gbc.weighty = 0.0;
+
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+
+        panel.add(
+                label,
+                gbc
+        );
+
+
+        gbc.gridx = 1;
+
+        gbc.gridy = row;
+
+        gbc.weightx = 1.0;
+
+        gbc.weighty = 0.0;
+
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+
+        panel.add(
+                component,
+                gbc
         );
     }
 
 
     // =========================================================
-    // TEXT FIELD STYLE
+    // SEARCH HELPER
     // =========================================================
 
-    private void styleTextField(
-            JTextField field
+    private boolean contains(
+            String value,
+            String keyword
     ) {
 
-        field.setFont(
-                Theme.NORMAL_FONT
+        if (
+                value == null
+                        || keyword == null
+        ) {
+
+            return false;
+        }
+
+
+        return value
+                .toLowerCase()
+                .contains(
+                        keyword
+                );
+    }
+
+
+    // =========================================================
+    // FORMAT EMERGENCY TYPE
+    // =========================================================
+
+    private String formatEmergencyType(
+            EmergencyType type
+    ) {
+
+        if (type == null) {
+            return "N/A";
+        }
+
+
+        return formatEnumText(
+                type.toString()
         );
+    }
 
 
-        field.setForeground(
-                Theme.TEXT
+    // =========================================================
+    // FORMAT PRIORITY
+    // =========================================================
+
+    private String formatPriority(
+            Priority priority
+    ) {
+
+        if (priority == null) {
+            return "N/A";
+        }
+
+
+        return formatEnumText(
+                priority.toString()
         );
+    }
 
 
-        field.setBackground(
-                Theme.WHITE
+    // =========================================================
+    // FORMAT STATUS
+    // =========================================================
+
+    private String formatStatus(
+            EmergencyStatus status
+    ) {
+
+        if (status == null) {
+            return "N/A";
+        }
+
+
+        return formatEnumText(
+                status.toString()
         );
+    }
 
 
-        field.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                Theme.STONE_BROWN
-                        ),
-                        BorderFactory.createEmptyBorder(
-                                7,
-                                8,
-                                7,
-                                8
+    // =========================================================
+    // FORMAT ENUM TEXT
+    // =========================================================
+
+    private String formatEnumText(
+            String value
+    ) {
+
+        String text =
+                value
+                        .replace(
+                                "_",
+                                " "
                         )
-                )
-        );
-    }
+                        .toLowerCase();
 
 
-    // =========================================================
-    // COMBO BOX STYLE
-    // =========================================================
-
-    private void styleComboBox(
-            JComboBox<?> comboBox
-    ) {
-
-        comboBox.setFont(
-                Theme.NORMAL_FONT
-        );
-
-
-        comboBox.setForeground(
-                Theme.TEXT
-        );
-
-
-        comboBox.setBackground(
-                Theme.WHITE
-        );
-    }
-
-
-    // =========================================================
-    // TABLE STYLE
-    // =========================================================
-
-    private void styleTable(
-            JTable table
-    ) {
-
-        table.setRowHeight(
-                30
-        );
-
-
-        table.setFont(
-                Theme.NORMAL_FONT
-        );
-
-
-        table.setForeground(
-                Theme.TEXT
-        );
-
-
-        table.setBackground(
-                Theme.WHITE
-        );
-
-
-        table.setGridColor(
-                Theme.KHAKI_BEIGE
-        );
-
-
-        table.setSelectionBackground(
-                Theme.KHAKI_BEIGE
-        );
-
-
-        table.setSelectionForeground(
-                Theme.BLACK
-        );
-
-
-        table.setSelectionMode(
-                ListSelectionModel.SINGLE_SELECTION
-        );
-
-
-        table.getTableHeader()
-                .setFont(
-                        Theme.SUBTITLE_FONT
+        String[] words =
+                text.split(
+                        " "
                 );
 
 
-        table.getTableHeader()
-                .setBackground(
-                        Theme.JET_BLACK
+        StringBuilder result =
+                new StringBuilder();
+
+
+        for (
+                String word :
+                words
+        ) {
+
+            if (
+                    word.isEmpty()
+            ) {
+
+                continue;
+            }
+
+
+            result.append(
+                    Character.toUpperCase(
+                            word.charAt(0)
+                    )
+            );
+
+
+            if (
+                    word.length() > 1
+            ) {
+
+                result.append(
+                        word.substring(1)
                 );
+            }
 
 
-        table.getTableHeader()
-                .setForeground(
-                        Theme.LIGHT_TEXT
-                );
+            result.append(
+                    " "
+            );
+        }
 
 
-        table.getTableHeader()
-                .setReorderingAllowed(
-                        false
-                );
+        return result
+                .toString()
+                .trim();
     }
 }
