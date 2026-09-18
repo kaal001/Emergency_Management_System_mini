@@ -1,0 +1,16 @@
+package enums;
+
+public enum EmergencyType {
+
+    MEDICAL,
+    FIRE,
+    ROAD_ACCIDENT,
+    SECURITY,
+    NATURAL_DISASTER,
+    GAS_LEAK,
+    ELECTRICAL_EMERGENCY,
+    BUILDING_COLLAPSE,
+    INDUSTRIAL_ACCIDENT,
+    MISSING_PERSON,
+    WATER_FLOOD_EMERGENCY
+}
