@@ -92,7 +92,7 @@ public class AssignmentManagementPanel extends JPanel {
         setLayout(
                 new BorderLayout(
                         0,
-                        15
+                        14
                 )
         );
 
@@ -102,9 +102,9 @@ public class AssignmentManagementPanel extends JPanel {
 
         setBorder(
                 BorderFactory.createEmptyBorder(
-                        20,
+                        18,
                         22,
-                        20,
+                        14,
                         22
                 )
         );
@@ -116,6 +116,10 @@ public class AssignmentManagementPanel extends JPanel {
         );
 
 
+        // =====================================================
+        // MAIN AREA
+        // =====================================================
+
         JSplitPane splitPane =
                 new JSplitPane(
                         JSplitPane.HORIZONTAL_SPLIT,
@@ -124,19 +128,23 @@ public class AssignmentManagementPanel extends JPanel {
                 );
 
         splitPane.setDividerLocation(
-                360
+                400
         );
 
         splitPane.setResizeWeight(
-                0.30
+                0.36
         );
 
         splitPane.setContinuousLayout(
                 true
         );
 
+        splitPane.setDividerSize(
+                6
+        );
+
         splitPane.setBorder(
-                null
+                BorderFactory.createEmptyBorder()
         );
 
 
@@ -145,6 +153,10 @@ public class AssignmentManagementPanel extends JPanel {
                 BorderLayout.CENTER
         );
 
+
+        // =====================================================
+        // BOTTOM ACTION BAR
+        // =====================================================
 
         add(
                 createActionBar(),
@@ -168,6 +180,15 @@ public class AssignmentManagementPanel extends JPanel {
                 Theme.BACKGROUND
         );
 
+        panel.setBorder(
+                BorderFactory.createEmptyBorder(
+                        2,
+                        4,
+                        8,
+                        4
+                )
+        );
+
 
         JPanel titlePanel =
                 new JPanel();
@@ -179,8 +200,22 @@ public class AssignmentManagementPanel extends JPanel {
                 )
         );
 
-        titlePanel.setBackground(
-                Theme.BACKGROUND
+        titlePanel.setOpaque(
+                false
+        );
+
+
+        JLabel eyebrow =
+                new JLabel(
+                        ""
+                );
+
+        eyebrow.setFont(
+                Theme.SMALL_FONT
+        );
+
+        eyebrow.setForeground(
+                Theme.STONE_BROWN
         );
 
 
@@ -213,11 +248,23 @@ public class AssignmentManagementPanel extends JPanel {
 
 
         titlePanel.add(
+                eyebrow
+        );
+
+        titlePanel.add(
+                Box.createVerticalStrut(
+                        2
+                )
+        );
+
+        titlePanel.add(
                 title
         );
 
         titlePanel.add(
-                Box.createVerticalStrut(4)
+                Box.createVerticalStrut(
+                        3
+                )
         );
 
         titlePanel.add(
@@ -228,6 +275,67 @@ public class AssignmentManagementPanel extends JPanel {
         panel.add(
                 titlePanel,
                 BorderLayout.WEST
+        );
+
+
+        JPanel statusPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                6,
+                                5
+                        )
+                );
+
+        statusPanel.setOpaque(
+                false
+        );
+
+
+        JLabel dot =
+                new JLabel(
+                        "●"
+                );
+
+        dot.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        dot.setForeground(
+                Theme.ACCENT
+        );
+
+
+        JLabel status =
+                new JLabel(
+                        "ASSIGNMENT CONTROL"
+                );
+
+        status.setFont(
+                Theme.SMALL_FONT
+        );
+
+        status.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+
+        statusPanel.add(
+                dot
+        );
+
+        statusPanel.add(
+                status
+        );
+
+
+        panel.add(
+                statusPanel,
+                BorderLayout.EAST
         );
 
 
@@ -252,16 +360,33 @@ public class AssignmentManagementPanel extends JPanel {
 
         outerPanel.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                Theme.KHAKI_BEIGE
+                        Theme.createRoundedBorder(
+                                Theme.KHAKI_BEIGE,
+                                14,
+                                1,
+                                1
                         ),
                         BorderFactory.createEmptyBorder(
+                                14,
                                 16,
-                                16,
-                                16,
+                                12,
                                 16
                         )
                 )
+        );
+
+
+        // =====================================================
+        // FORM HEADER
+        // =====================================================
+
+        JPanel formHeader =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        formHeader.setOpaque(
+                false
         );
 
 
@@ -279,19 +404,48 @@ public class AssignmentManagementPanel extends JPanel {
         );
 
 
-        outerPanel.add(
+        JLabel formSubtitle =
+                new JLabel(
+                        "Connect an emergency with a suitable response team."
+                );
+
+        formSubtitle.setFont(
+                Theme.SMALL_FONT
+        );
+
+        formSubtitle.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+
+        formHeader.add(
                 formTitle,
                 BorderLayout.NORTH
         );
 
+        formHeader.add(
+                formSubtitle,
+                BorderLayout.SOUTH
+        );
+
+
+        outerPanel.add(
+                formHeader,
+                BorderLayout.NORTH
+        );
+
+
+        // =====================================================
+        // FORM
+        // =====================================================
 
         JPanel form =
                 new JPanel(
                         new GridBagLayout()
                 );
 
-        form.setBackground(
-                Theme.ALMOND_CREAM
+        form.setOpaque(
+                false
         );
 
 
@@ -300,11 +454,14 @@ public class AssignmentManagementPanel extends JPanel {
 
         gbc.insets =
                 new Insets(
-                        8,
-                        5,
-                        8,
-                        5
+                        7,
+                        4,
+                        7,
+                        4
                 );
+
+        gbc.anchor =
+                GridBagConstraints.WEST;
 
         gbc.fill =
                 GridBagConstraints.HORIZONTAL;
@@ -324,6 +481,7 @@ public class AssignmentManagementPanel extends JPanel {
         assignmentIdField.setEditable(
                 false
         );
+
 
         addFormRow(
                 form,
@@ -345,6 +503,7 @@ public class AssignmentManagementPanel extends JPanel {
                 emergencyComboBox
         );
 
+
         addFormRow(
                 form,
                 gbc,
@@ -355,7 +514,7 @@ public class AssignmentManagementPanel extends JPanel {
 
 
         // =====================================================
-        // TEAM
+        // RESPONSE TEAM
         // =====================================================
 
         teamComboBox =
@@ -364,6 +523,7 @@ public class AssignmentManagementPanel extends JPanel {
         styleComboBox(
                 teamComboBox
         );
+
 
         addFormRow(
                 form,
@@ -385,6 +545,7 @@ public class AssignmentManagementPanel extends JPanel {
                 assignedTimeField
         );
 
+
         addFormRow(
                 form,
                 gbc,
@@ -397,6 +558,20 @@ public class AssignmentManagementPanel extends JPanel {
         // =====================================================
         // NOTES
         // =====================================================
+
+        JLabel notesLabel =
+                new JLabel(
+                        "Notes"
+                );
+
+        notesLabel.setFont(
+                Theme.SUBTITLE_FONT
+        );
+
+        notesLabel.setForeground(
+                Theme.TEXT
+        );
+
 
         notesArea =
                 new JTextArea(
@@ -425,16 +600,11 @@ public class AssignmentManagementPanel extends JPanel {
         );
 
         notesArea.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                Theme.STONE_BROWN
-                        ),
-                        BorderFactory.createEmptyBorder(
-                                6,
-                                7,
-                                6,
-                                7
-                        )
+                BorderFactory.createEmptyBorder(
+                        6,
+                        7,
+                        6,
+                        7
                 )
         );
 
@@ -447,38 +617,115 @@ public class AssignmentManagementPanel extends JPanel {
         notesScroll.setPreferredSize(
                 new Dimension(
                         200,
-                        110
+                        105
+                )
+        );
+
+        notesScroll.setBorder(
+                BorderFactory.createLineBorder(
+                        Theme.STONE_BROWN
                 )
         );
 
 
-        addFormRow(
-                form,
-                gbc,
-                4,
-                "Notes",
-                notesScroll
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        gbc.weightx = 0.30;
+        gbc.weighty = 0.0;
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+
+        form.add(
+                notesLabel,
+                gbc
+        );
+
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.70;
+        gbc.fill =
+                GridBagConstraints.BOTH;
+
+
+        form.add(
+                notesScroll,
+                gbc
         );
 
 
         // =====================================================
-        // INFO
+        // ASSIGNMENT RULE
         // =====================================================
 
-        JLabel infoLabel =
-                new JLabel(
-                        "<html><b>Assignment rule:</b><br>"
-                                + "Emergency must be PENDING and "
-                                + "the selected team must be AVAILABLE "
-                                + "and suitable.</html>"
+        JPanel rulePanel =
+                new JPanel(
+                        new BorderLayout(
+                                8,
+                                0
+                        )
                 );
 
-        infoLabel.setFont(
+        rulePanel.setBackground(
+                new Color(
+                        Theme.KHAKI_BEIGE.getRed(),
+                        Theme.KHAKI_BEIGE.getGreen(),
+                        Theme.KHAKI_BEIGE.getBlue(),
+                        55
+                )
+        );
+
+        rulePanel.setBorder(
+                Theme.createRoundedBorder(
+                        Theme.KHAKI_BEIGE,
+                        12,
+                        1,
+                        7
+                )
+        );
+
+
+        JLabel ruleTitle =
+                new JLabel(
+                        "ASSIGNMENT RULE"
+                );
+
+        ruleTitle.setFont(
                 Theme.SMALL_FONT
         );
 
-        infoLabel.setForeground(
-                Theme.MUTED_TEXT
+        ruleTitle.setForeground(
+                Theme.STONE_BROWN
+        );
+
+
+        JLabel ruleText =
+                new JLabel(
+                        "<html>"
+                                + "Emergency must be <b>PENDING</b> and "
+                                + "the selected team must be <b>AVAILABLE</b> "
+                                + "and suitable for that emergency."
+                                + "</html>"
+                );
+
+        ruleText.setFont(
+                Theme.SMALL_FONT
+        );
+
+        ruleText.setForeground(
+                Theme.TEXT
+        );
+
+
+        rulePanel.add(
+                ruleTitle,
+                BorderLayout.NORTH
+        );
+
+        rulePanel.add(
+                ruleText,
+                BorderLayout.CENTER
         );
 
 
@@ -486,9 +733,40 @@ public class AssignmentManagementPanel extends JPanel {
         gbc.gridy = 5;
         gbc.gridwidth = 2;
         gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
 
         form.add(
-                infoLabel,
+                rulePanel,
+                gbc
+        );
+
+
+        // =====================================================
+        // FLEXIBLE EMPTY AREA
+        // =====================================================
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill =
+                GridBagConstraints.VERTICAL;
+
+
+        JPanel spacer =
+                new JPanel();
+
+        spacer.setOpaque(
+                false
+        );
+
+
+        form.add(
+                spacer,
                 gbc
         );
 
@@ -532,7 +810,14 @@ public class AssignmentManagementPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.gridwidth = 1;
-        gbc.weightx = 0.35;
+        gbc.weighty = 0.0;
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+
+        gbc.weightx =
+                0.30;
+
 
         panel.add(
                 label,
@@ -541,7 +826,38 @@ public class AssignmentManagementPanel extends JPanel {
 
 
         gbc.gridx = 1;
-        gbc.weightx = 0.65;
+        gbc.weightx =
+                0.70;
+
+
+        if (
+                component instanceof JComponent
+        ) {
+
+            ((JComponent) component)
+                    .setMinimumSize(
+                            new Dimension(
+                                    0,
+                                    36
+                            )
+                    );
+        }
+
+
+        if (
+                component instanceof JTextField
+                        || component instanceof JComboBox
+        ) {
+
+            ((JComponent) component)
+                    .setPreferredSize(
+                            new Dimension(
+                                    0,
+                                    36
+                            )
+                    );
+        }
+
 
         panel.add(
                 component,
@@ -607,6 +923,13 @@ public class AssignmentManagementPanel extends JPanel {
                 searchField
         );
 
+        searchField.setPreferredSize(
+                new Dimension(
+                        220,
+                        36
+                )
+        );
+
 
         JButton searchButton =
                 new JButton(
@@ -633,6 +956,11 @@ public class AssignmentManagementPanel extends JPanel {
         );
 
 
+        searchField.addActionListener(
+                e -> searchAssignments()
+        );
+
+
         clearSearchButton.addActionListener(
                 e -> {
 
@@ -650,8 +978,28 @@ public class AssignmentManagementPanel extends JPanel {
                 BorderLayout.WEST
         );
 
+
+        JPanel searchInput =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.LEFT,
+                                0,
+                                0
+                        )
+                );
+
+        searchInput.setOpaque(
+                false
+        );
+
+
+        searchInput.add(
+                searchField
+        );
+
+
         searchPanel.add(
-                searchField,
+                searchInput,
                 BorderLayout.CENTER
         );
 
@@ -660,7 +1008,7 @@ public class AssignmentManagementPanel extends JPanel {
                 new JPanel(
                         new FlowLayout(
                                 FlowLayout.RIGHT,
-                                5,
+                                6,
                                 0
                         )
                 );
@@ -668,6 +1016,7 @@ public class AssignmentManagementPanel extends JPanel {
         searchButtons.setBackground(
                 Theme.BACKGROUND
         );
+
 
         searchButtons.add(
                 searchButton
@@ -750,10 +1099,18 @@ public class AssignmentManagementPanel extends JPanel {
                 );
 
         scrollPane.setBorder(
-                BorderFactory.createLineBorder(
-                        Theme.STONE_BROWN
+                Theme.createRoundedBorder(
+                        Theme.STONE_BROWN,
+                        14,
+                        1,
+                        1
                 )
         );
+
+        scrollPane.getViewport()
+                .setBackground(
+                        Theme.WHITE
+                );
 
 
         panel.add(
@@ -774,6 +1131,49 @@ public class AssignmentManagementPanel extends JPanel {
 
         JPanel panel =
                 new JPanel(
+                        new BorderLayout()
+                );
+
+        panel.setBackground(
+                Theme.BACKGROUND
+        );
+
+        panel.setBorder(
+                BorderFactory.createEmptyBorder(
+                        6,
+                        0,
+                        0,
+                        0
+                )
+        );
+
+
+        JLabel hint =
+                new JLabel(
+                        "Select an assignment to edit or remove it."
+                );
+
+        hint.setFont(
+                Theme.SMALL_FONT
+        );
+
+        hint.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+
+        panel.add(
+                hint,
+                BorderLayout.WEST
+        );
+
+
+        // =====================================================
+        // BUTTONS
+        // =====================================================
+
+        JPanel buttons =
+                new JPanel(
                         new FlowLayout(
                                 FlowLayout.RIGHT,
                                 8,
@@ -781,7 +1181,7 @@ public class AssignmentManagementPanel extends JPanel {
                         )
                 );
 
-        panel.setBackground(
+        buttons.setBackground(
                 Theme.BACKGROUND
         );
 
@@ -830,33 +1230,42 @@ public class AssignmentManagementPanel extends JPanel {
                 e -> addAssignment()
         );
 
+
         updateButton.addActionListener(
                 e -> updateAssignment()
         );
 
+
         deleteButton.addActionListener(
                 e -> deleteAssignment()
         );
+
 
         clearButton.addActionListener(
                 e -> clearForm()
         );
 
 
-        panel.add(
+        buttons.add(
                 addButton
         );
 
-        panel.add(
+        buttons.add(
                 updateButton
         );
 
-        panel.add(
+        buttons.add(
                 deleteButton
         );
 
-        panel.add(
+        buttons.add(
                 clearButton
+        );
+
+
+        panel.add(
+                buttons,
+                BorderLayout.EAST
         );
 
 
@@ -940,13 +1349,16 @@ public class AssignmentManagementPanel extends JPanel {
         String emergencyId =
                 getSelectedEmergencyId();
 
+
         String teamId =
                 getSelectedTeamId();
+
 
         String assignedTime =
                 assignedTimeField
                         .getText()
                         .trim();
+
 
         String notes =
                 notesArea
@@ -1048,10 +1460,12 @@ public class AssignmentManagementPanel extends JPanel {
         String teamId =
                 getSelectedTeamId();
 
+
         String assignedTime =
                 assignedTimeField
                         .getText()
                         .trim();
+
 
         String notes =
                 notesArea
@@ -1150,8 +1564,10 @@ public class AssignmentManagementPanel extends JPanel {
                 );
 
 
-        if (result
-                != JOptionPane.YES_OPTION) {
+        if (
+                result
+                        != JOptionPane.YES_OPTION
+        ) {
 
             return;
         }
@@ -1279,6 +1695,7 @@ public class AssignmentManagementPanel extends JPanel {
 
 
         if (row < 0) {
+
             return;
         }
 
@@ -1300,6 +1717,7 @@ public class AssignmentManagementPanel extends JPanel {
 
 
         if (assignment == null) {
+
             return;
         }
 
@@ -1330,8 +1748,8 @@ public class AssignmentManagementPanel extends JPanel {
 
 
         /*
-         * Emergency is not changed during assignment update.
-         * The assignment belongs to the same emergency.
+         * Emergency belongs to the assignment and is not
+         * changed during an assignment update.
          */
         emergencyComboBox.setEnabled(
                 false
@@ -1403,6 +1821,7 @@ public class AssignmentManagementPanel extends JPanel {
 
 
         if (value == null) {
+
             return null;
         }
 
@@ -1423,6 +1842,7 @@ public class AssignmentManagementPanel extends JPanel {
 
 
         if (value == null) {
+
             return null;
         }
 
@@ -1445,7 +1865,9 @@ public class AssignmentManagementPanel extends JPanel {
 
         return LocalDateTime
                 .now()
-                .format(formatter);
+                .format(
+                        formatter
+                );
     }
 
 
@@ -1521,6 +1943,12 @@ public class AssignmentManagementPanel extends JPanel {
         comboBox.setBackground(
                 Theme.WHITE
         );
+
+        comboBox.setBorder(
+                BorderFactory.createLineBorder(
+                        Theme.STONE_BROWN
+                )
+        );
     }
 
 
@@ -1533,7 +1961,7 @@ public class AssignmentManagementPanel extends JPanel {
     ) {
 
         table.setRowHeight(
-                30
+                31
         );
 
         table.setFont(
@@ -1564,6 +1992,21 @@ public class AssignmentManagementPanel extends JPanel {
                 ListSelectionModel.SINGLE_SELECTION
         );
 
+        table.setShowVerticalLines(
+                false
+        );
+
+        table.setShowHorizontalLines(
+                true
+        );
+
+        table.setIntercellSpacing(
+                new Dimension(
+                        0,
+                        1
+                )
+        );
+
 
         table.getTableHeader()
                 .setFont(
@@ -1578,6 +2021,14 @@ public class AssignmentManagementPanel extends JPanel {
         table.getTableHeader()
                 .setForeground(
                         Theme.LIGHT_TEXT
+                );
+
+        table.getTableHeader()
+                .setPreferredSize(
+                        new Dimension(
+                                0,
+                                38
+                        )
                 );
 
         table.getTableHeader()

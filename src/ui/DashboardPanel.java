@@ -7,6 +7,7 @@ import manager.TeamManager;
 import model.Emergency;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class DashboardPanel extends JPanel {
     // =========================================================
 
     private final EmergencyManager emergencyManager;
+
     private final TeamManager teamManager;
 
 
@@ -26,15 +28,25 @@ public class DashboardPanel extends JPanel {
     // =========================================================
 
     private JLabel totalValueLabel;
+
     private JLabel pendingValueLabel;
+
     private JLabel criticalValueLabel;
+
     private JLabel inProgressValueLabel;
+
     private JLabel resolvedValueLabel;
+
     private JLabel unassignedValueLabel;
+
     private JLabel availableTeamsValueLabel;
+
     private JLabel busyTeamsValueLabel;
 
     private DefaultTableModel recentTableModel;
+
+    private final ArrayList<Timer> animationTimers =
+            new ArrayList<>();
 
 
     // =========================================================
@@ -86,7 +98,7 @@ public class DashboardPanel extends JPanel {
 
 
         // =====================================================
-        // TITLE
+        // TITLE AREA
         // =====================================================
 
         JPanel titlePanel =
@@ -96,6 +108,21 @@ public class DashboardPanel extends JPanel {
 
         titlePanel.setBackground(
                 Theme.BACKGROUND
+        );
+
+
+        JPanel titleText =
+                new JPanel();
+
+        titleText.setLayout(
+                new BoxLayout(
+                        titleText,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        titleText.setOpaque(
+                false
         );
 
 
@@ -115,11 +142,11 @@ public class DashboardPanel extends JPanel {
 
         JLabel subtitleLabel =
                 new JLabel(
-                        "Monitor emergency activity and response operations."
+                        "MONITOR EMERGENCY ACTIVITY // RESPONSE OPERATIONS"
                 );
 
         subtitleLabel.setFont(
-                Theme.NORMAL_FONT
+                Theme.SMALL_FONT
         );
 
         subtitleLabel.setForeground(
@@ -127,26 +154,14 @@ public class DashboardPanel extends JPanel {
         );
 
 
-        JPanel titleText =
-                new JPanel();
-
-        titleText.setLayout(
-                new BoxLayout(
-                        titleText,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        titleText.setBackground(
-                Theme.BACKGROUND
-        );
-
         titleText.add(
                 titleLabel
         );
 
         titleText.add(
-                Box.createVerticalStrut(4)
+                Box.createVerticalStrut(
+                        4
+                )
         );
 
         titleText.add(
@@ -162,7 +177,7 @@ public class DashboardPanel extends JPanel {
 
         JButton refreshButton =
                 new JButton(
-                        "REFRESH"
+                        "REFRESH DATA"
                 );
 
         Theme.styleHeaderButton(
@@ -170,7 +185,29 @@ public class DashboardPanel extends JPanel {
         );
 
         refreshButton.addActionListener(
-                e -> refreshDashboard()
+                e -> {
+
+                    refreshDashboard();
+
+                    refreshButton.setText(
+                            "UPDATED ✓"
+                    );
+
+                    Timer timer =
+                            new Timer(
+                                    900,
+                                    event ->
+                                            refreshButton.setText(
+                                                    "REFRESH DATA"
+                                            )
+                            );
+
+                    timer.setRepeats(
+                            false
+                    );
+
+                    timer.start();
+                }
         );
 
 
@@ -250,56 +287,64 @@ public class DashboardPanel extends JPanel {
         statisticsPanel.add(
                 createStatCard(
                         "TOTAL EMERGENCIES",
-                        totalValueLabel
+                        totalValueLabel,
+                        Theme.KHAKI_BEIGE
                 )
         );
 
         statisticsPanel.add(
                 createStatCard(
                         "PENDING",
-                        pendingValueLabel
+                        pendingValueLabel,
+                        Theme.KHAKI_BEIGE
                 )
         );
 
         statisticsPanel.add(
                 createStatCard(
                         "CRITICAL",
-                        criticalValueLabel
+                        criticalValueLabel,
+                        Theme.STONE_BROWN
                 )
         );
 
         statisticsPanel.add(
                 createStatCard(
                         "IN PROGRESS",
-                        inProgressValueLabel
+                        inProgressValueLabel,
+                        Theme.JET_BLACK
                 )
         );
 
         statisticsPanel.add(
                 createStatCard(
                         "RESOLVED",
-                        resolvedValueLabel
+                        resolvedValueLabel,
+                        Theme.STONE_BROWN
                 )
         );
 
         statisticsPanel.add(
                 createStatCard(
                         "UNASSIGNED",
-                        unassignedValueLabel
+                        unassignedValueLabel,
+                        Theme.KHAKI_BEIGE
                 )
         );
 
         statisticsPanel.add(
                 createStatCard(
                         "AVAILABLE TEAMS",
-                        availableTeamsValueLabel
+                        availableTeamsValueLabel,
+                        Theme.KHAKI_BEIGE
                 )
         );
 
         statisticsPanel.add(
                 createStatCard(
                         "BUSY TEAMS",
-                        busyTeamsValueLabel
+                        busyTeamsValueLabel,
+                        Theme.STONE_BROWN
                 )
         );
 
@@ -318,12 +363,22 @@ public class DashboardPanel extends JPanel {
                 new JPanel(
                         new BorderLayout(
                                 0,
-                                8
+                                10
                         )
                 );
 
         recentPanel.setBackground(
                 Theme.BACKGROUND
+        );
+
+
+        JPanel recentHeader =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        recentHeader.setOpaque(
+                false
         );
 
 
@@ -341,8 +396,33 @@ public class DashboardPanel extends JPanel {
         );
 
 
-        recentPanel.add(
+        JLabel recentHint =
+                new JLabel(
+                        "Latest 10 records"
+                );
+
+        recentHint.setFont(
+                Theme.SMALL_FONT
+        );
+
+        recentHint.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+
+        recentHeader.add(
                 recentTitle,
+                BorderLayout.WEST
+        );
+
+        recentHeader.add(
+                recentHint,
+                BorderLayout.EAST
+        );
+
+
+        recentPanel.add(
+                recentHeader,
                 BorderLayout.NORTH
         );
 
@@ -391,10 +471,18 @@ public class DashboardPanel extends JPanel {
                 );
 
         scrollPane.setBorder(
-                BorderFactory.createLineBorder(
-                        Theme.STONE_BROWN
+                Theme.createRoundedBorder(
+                        Theme.STONE_BROWN,
+                        16,
+                        1,
+                        1
                 )
         );
+
+        scrollPane.getViewport()
+                .setBackground(
+                        Theme.WHITE
+                );
 
 
         recentPanel.add(
@@ -417,47 +505,137 @@ public class DashboardPanel extends JPanel {
 
 
     // =========================================================
-    // STAT CARD
+    // CREATE STAT CARD
     // =========================================================
 
     private JPanel createStatCard(
             String title,
-            JLabel valueLabel
+            JLabel valueLabel,
+            Color accentColor
     ) {
 
         JPanel card =
                 new JPanel(
                         new BorderLayout(
                                 0,
-                                6
+                                5
+                        )
+                ) {
+
+                    @Override
+                    protected void paintComponent(
+                            Graphics graphics
+                    ) {
+
+                        Graphics2D g2 =
+                                (Graphics2D)
+                                        graphics.create();
+
+                        try {
+
+                            g2.setRenderingHint(
+                                    RenderingHints.KEY_ANTIALIASING,
+                                    RenderingHints.VALUE_ANTIALIAS_ON
+                            );
+
+
+                            // =================================================
+                            // SUBTLE SHADOW
+                            // =================================================
+
+                            g2.setColor(
+                                    new Color(
+                                            Theme.BLACK.getRed(),
+                                            Theme.BLACK.getGreen(),
+                                            Theme.BLACK.getBlue(),
+                                            18
+                                    )
+                            );
+
+                            g2.fillRoundRect(
+                                    3,
+                                    4,
+                                    getWidth() - 3,
+                                    getHeight() - 4,
+                                    18,
+                                    18
+                            );
+
+
+                            // =================================================
+                            // CARD BODY
+                            // =================================================
+
+                            g2.setColor(
+                                    Theme.ALMOND_CREAM
+                            );
+
+                            g2.fillRoundRect(
+                                    0,
+                                    0,
+                                    getWidth() - 4,
+                                    getHeight() - 4,
+                                    18,
+                                    18
+                            );
+
+                        } finally {
+
+                            g2.dispose();
+                        }
+
+
+                        super.paintComponent(
+                                graphics
+                        );
+                    }
+                };
+
+
+        card.setOpaque(
+                false
+        );
+
+
+        card.setBorder(
+                BorderFactory.createEmptyBorder(
+                        14,
+                        16,
+                        14,
+                        16
+                )
+        );
+
+
+        // =====================================================
+        // ACCENT BAR
+        // =====================================================
+
+        JPanel accentBar =
+                new JPanel();
+
+        accentBar.setBackground(
+                accentColor
+        );
+
+        accentBar.setPreferredSize(
+                new Dimension(
+                        0,
+                        4
+                )
+        );
+
+
+        JPanel cardContent =
+                new JPanel(
+                        new BorderLayout(
+                                0,
+                                4
                         )
                 );
 
-        card.setBackground(
-                Theme.ALMOND_CREAM
-        );
-
-        card.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createMatteBorder(
-                                3,
-                                0,
-                                0,
-                                0,
-                                Theme.KHAKI_BEIGE
-                        ),
-                        BorderFactory.createCompoundBorder(
-                                BorderFactory.createLineBorder(
-                                        Theme.KHAKI_BEIGE
-                                ),
-                                BorderFactory.createEmptyBorder(
-                                        12,
-                                        14,
-                                        12,
-                                        14
-                                )
-                        )
-                )
+        cardContent.setOpaque(
+                false
         );
 
 
@@ -476,13 +654,24 @@ public class DashboardPanel extends JPanel {
         );
 
 
-        card.add(
+        cardContent.add(
                 titleLabel,
                 BorderLayout.NORTH
         );
 
-        card.add(
+        cardContent.add(
                 valueLabel,
+                BorderLayout.CENTER
+        );
+
+
+        card.add(
+                accentBar,
+                BorderLayout.NORTH
+        );
+
+        card.add(
+                cardContent,
                 BorderLayout.CENTER
         );
 
@@ -504,11 +693,7 @@ public class DashboardPanel extends JPanel {
                 );
 
         label.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        28
-                )
+                Theme.STAT_FONT
         );
 
         label.setForeground(
@@ -525,9 +710,13 @@ public class DashboardPanel extends JPanel {
 
     public void refreshDashboard() {
 
+        stopAnimations();
+
+
         int total =
                 emergencyManager
                         .getTotalEmergencies();
+
 
         int pending =
                 emergencyManager
@@ -535,17 +724,20 @@ public class DashboardPanel extends JPanel {
                                 EmergencyStatus.PENDING
                         );
 
+
         int critical =
                 emergencyManager
                         .getCountByPriority(
                                 Priority.CRITICAL
                         );
 
+
         int inProgress =
                 emergencyManager
                         .getCountByStatus(
                                 EmergencyStatus.IN_PROGRESS
                         );
+
 
         int resolved =
                 emergencyManager
@@ -563,11 +755,14 @@ public class DashboardPanel extends JPanel {
                 : emergencyManager.getAllEmergencies()
         ) {
 
-            if (emergency.getAssignedTeamId()
-                    == null
-                    || emergency.getAssignedTeamId()
-                    .trim()
-                    .isEmpty()) {
+            if (
+                    emergency.getAssignedTeamId()
+                            == null
+                            || emergency
+                            .getAssignedTeamId()
+                            .trim()
+                            .isEmpty()
+            ) {
 
                 unassigned++;
             }
@@ -578,45 +773,178 @@ public class DashboardPanel extends JPanel {
                 teamManager
                         .getAvailableTeamCount();
 
+
         int busyTeams =
                 teamManager
                         .getBusyTeamCount();
 
 
-        totalValueLabel.setText(
-                String.valueOf(total)
+        // =====================================================
+        // ANIMATED VALUES
+        // =====================================================
+
+        animateValue(
+                totalValueLabel,
+                total
         );
 
-        pendingValueLabel.setText(
-                String.valueOf(pending)
+        animateValue(
+                pendingValueLabel,
+                pending
         );
 
-        criticalValueLabel.setText(
-                String.valueOf(critical)
+        animateValue(
+                criticalValueLabel,
+                critical
         );
 
-        inProgressValueLabel.setText(
-                String.valueOf(inProgress)
+        animateValue(
+                inProgressValueLabel,
+                inProgress
         );
 
-        resolvedValueLabel.setText(
-                String.valueOf(resolved)
+        animateValue(
+                resolvedValueLabel,
+                resolved
         );
 
-        unassignedValueLabel.setText(
-                String.valueOf(unassigned)
+        animateValue(
+                unassignedValueLabel,
+                unassigned
         );
 
-        availableTeamsValueLabel.setText(
-                String.valueOf(availableTeams)
+        animateValue(
+                availableTeamsValueLabel,
+                availableTeams
         );
 
-        busyTeamsValueLabel.setText(
-                String.valueOf(busyTeams)
+        animateValue(
+                busyTeamsValueLabel,
+                busyTeams
         );
 
 
         loadRecentEmergencies();
+    }
+
+
+    // =========================================================
+    // ANIMATED COUNTER
+    // =========================================================
+
+    private void animateValue(
+            JLabel label,
+            int target
+    ) {
+
+        final int[] current =
+                {0};
+
+        final int duration =
+                450;
+
+        final int interval =
+                20;
+
+        final int steps =
+                duration / interval;
+
+
+        Timer timer =
+                new Timer(
+                        interval,
+                        null
+                );
+
+
+        timer.addActionListener(
+                e -> {
+
+                    current[0]++;
+
+
+                    double progress =
+                            Math.min(
+                                    1.0,
+                                    (double) current[0]
+                                            / steps
+                            );
+
+
+                    // =================================================
+                    // SMOOTH EASING
+                    // =================================================
+
+                    double eased =
+                            1.0
+                                    - Math.pow(
+                                    1.0 - progress,
+                                    3
+                            );
+
+
+                    int value =
+                            (int)
+                                    Math.round(
+                                            target * eased
+                                    );
+
+
+                    label.setText(
+                            String.valueOf(
+                                    value
+                            )
+                    );
+
+
+                    if (
+                            current[0]
+                                    >= steps
+                    ) {
+
+                        label.setText(
+                                String.valueOf(
+                                        target
+                                )
+                        );
+
+                        timer.stop();
+                    }
+                }
+        );
+
+
+        animationTimers.add(
+                timer
+        );
+
+
+        timer.start();
+    }
+
+
+    // =========================================================
+    // STOP ACTIVE ANIMATIONS
+    // =========================================================
+
+    private void stopAnimations() {
+
+        for (
+                Timer timer
+                : animationTimers
+        ) {
+
+            if (
+                    timer != null
+                            && timer.isRunning()
+            ) {
+
+                timer.stop();
+            }
+        }
+
+
+        animationTimers.clear();
     }
 
 
@@ -626,7 +954,9 @@ public class DashboardPanel extends JPanel {
 
     private void loadRecentEmergencies() {
 
-        recentTableModel.setRowCount(0);
+        recentTableModel.setRowCount(
+                0
+        );
 
 
         ArrayList<Emergency> emergencies =
@@ -655,24 +985,227 @@ public class DashboardPanel extends JPanel {
                     emergency.getAssignedTeamId();
 
 
-            if (assignedTeam == null
-                    || assignedTeam.trim().isEmpty()) {
+            if (
+                    assignedTeam == null
+                            || assignedTeam
+                            .trim()
+                            .isEmpty()
+            ) {
 
-                assignedTeam = "-";
+                assignedTeam =
+                        "-";
             }
 
 
             recentTableModel.addRow(
                     new Object[]{
                             emergency.getEmergencyId(),
-                            emergency.getType(),
-                            emergency.getPriority(),
+
+                            formatType(
+                                    emergency
+                                            .getType()
+                            ),
+
+                            formatPriority(
+                                    emergency
+                                            .getPriority()
+                            ),
+
                             emergency.getLocation(),
-                            emergency.getStatus(),
+
+                            formatStatus(
+                                    emergency
+                                            .getStatus()
+                            ),
+
                             assignedTeam
                     }
             );
         }
+    }
+
+
+    // =========================================================
+    // FORMAT TYPE
+    // =========================================================
+
+    private String formatType(
+            Object type
+    ) {
+
+        if (
+                type == null
+        ) {
+
+            return "-";
+        }
+
+
+        String text =
+                type.toString()
+                        .replace(
+                                "_",
+                                " "
+                        );
+
+
+        String[] parts =
+                text.toLowerCase()
+                        .split(
+                                " "
+                        );
+
+
+        StringBuilder result =
+                new StringBuilder();
+
+
+        for (
+                String part
+                : parts
+        ) {
+
+            if (
+                    part.isEmpty()
+            ) {
+
+                continue;
+            }
+
+
+            result.append(
+                    Character.toUpperCase(
+                            part.charAt(0)
+                    )
+            );
+
+
+            if (
+                    part.length() > 1
+            ) {
+
+                result.append(
+                        part.substring(
+                                1
+                        )
+                );
+            }
+
+
+            result.append(
+                    " "
+            );
+        }
+
+
+        return result.toString()
+                .trim();
+    }
+
+
+    // =========================================================
+    // FORMAT PRIORITY
+    // =========================================================
+
+    private String formatPriority(
+            Object priority
+    ) {
+
+        return formatEnumValue(
+                priority
+        );
+    }
+
+
+    // =========================================================
+    // FORMAT STATUS
+    // =========================================================
+
+    private String formatStatus(
+            Object status
+    ) {
+
+        return formatEnumValue(
+                status
+        );
+    }
+
+
+    // =========================================================
+    // GENERIC ENUM FORMAT
+    // =========================================================
+
+    private String formatEnumValue(
+            Object value
+    ) {
+
+        if (
+                value == null
+        ) {
+
+            return "-";
+        }
+
+
+        String text =
+                value.toString()
+                        .replace(
+                                "_",
+                                " "
+                        )
+                        .toLowerCase();
+
+
+        String[] parts =
+                text.split(
+                        " "
+                );
+
+
+        StringBuilder result =
+                new StringBuilder();
+
+
+        for (
+                String part
+                : parts
+        ) {
+
+            if (
+                    part.isEmpty()
+            ) {
+
+                continue;
+            }
+
+
+            result.append(
+                    Character.toUpperCase(
+                            part.charAt(0)
+                    )
+            );
+
+
+            if (
+                    part.length() > 1
+            ) {
+
+                result.append(
+                        part.substring(
+                                1
+                        )
+                );
+            }
+
+
+            result.append(
+                    " "
+            );
+        }
+
+
+        return result.toString()
+                .trim();
     }
 
 
@@ -684,57 +1217,317 @@ public class DashboardPanel extends JPanel {
             JTable table
     ) {
 
-        table.setRowHeight(
-                29
-        );
-
-        table.setFont(
-                Theme.NORMAL_FONT
-        );
-
-        table.setForeground(
-                Theme.TEXT
-        );
-
-        table.setBackground(
-                Theme.WHITE
-        );
-
-        table.setGridColor(
-                Theme.KHAKI_BEIGE
-        );
-
-        table.setSelectionBackground(
-                Theme.KHAKI_BEIGE
-        );
-
-        table.setSelectionForeground(
-                Theme.BLACK
-        );
-
-        table.setSelectionMode(
-                ListSelectionModel.SINGLE_SELECTION
+        Theme.styleTable(
+                table
         );
 
 
-        table.getTableHeader()
-                .setFont(
-                        Theme.SUBTITLE_FONT
-                );
+        if (
+                table.getColumnCount()
+                        > 2
+        ) {
 
-        table.getTableHeader()
-                .setBackground(
-                        Theme.JET_BLACK
-                );
+            table.getColumnModel()
+                    .getColumn(2)
+                    .setCellRenderer(
+                            new PriorityRenderer()
+                    );
+        }
 
-        table.getTableHeader()
-                .setForeground(
-                        Theme.LIGHT_TEXT
-                );
 
-        table.getTableHeader()
-                .setReorderingAllowed(
-                        false
-                );
+        if (
+                table.getColumnCount()
+                        > 4
+        ) {
+
+            table.getColumnModel()
+                    .getColumn(4)
+                    .setCellRenderer(
+                            new StatusRenderer()
+                    );
+        }
+
+
+        if (
+                table.getColumnCount()
+                        > 1
+        ) {
+
+            table.getColumnModel()
+                    .getColumn(1)
+                    .setCellRenderer(
+                            new DefaultTableCellRenderer() {
+
+                                @Override
+                                public Component
+                                getTableCellRendererComponent(
+                                        JTable table,
+                                        Object value,
+                                        boolean selected,
+                                        boolean focused,
+                                        int row,
+                                        int column
+                                ) {
+
+                                    Component component =
+                                            super
+                                                    .getTableCellRendererComponent(
+                                                            table,
+                                                            value,
+                                                            selected,
+                                                            focused,
+                                                            row,
+                                                            column
+                                                    );
+
+
+                                    setHorizontalAlignment(
+                                            SwingConstants.LEFT
+                                    );
+
+
+                                    if (
+                                            !selected
+                                    ) {
+
+                                        setBackground(
+                                                row % 2 == 0
+                                                        ? Theme.WHITE
+                                                        : Theme.ALMOND_CREAM
+                                        );
+
+                                        setForeground(
+                                                Theme.TEXT
+                                        );
+                                    }
+
+
+                                    return component;
+                                }
+                            }
+                    );
+        }
+    }
+
+
+    // =========================================================
+    // PRIORITY RENDERER
+    // =========================================================
+
+    private static class PriorityRenderer
+            extends DefaultTableCellRenderer {
+
+
+        @Override
+        public Component
+        getTableCellRendererComponent(
+                JTable table,
+                Object value,
+                boolean selected,
+                boolean focused,
+                int row,
+                int column
+        ) {
+
+            Component component =
+                    super
+                            .getTableCellRendererComponent(
+                                    table,
+                                    value,
+                                    selected,
+                                    focused,
+                                    row,
+                                    column
+                            );
+
+
+            setHorizontalAlignment(
+                    SwingConstants.CENTER
+            );
+
+
+            if (
+                    !selected
+            ) {
+
+                String text =
+                        value == null
+                                ? ""
+                                : value.toString()
+                                .toUpperCase();
+
+
+                if (
+                        text.contains(
+                                "CRITICAL"
+                        )
+                ) {
+
+                    setBackground(
+                            Theme.STONE_BROWN
+                    );
+
+                    setForeground(
+                            Theme.LIGHT_TEXT
+                    );
+
+
+                } else if (
+                        text.contains(
+                                "HIGH"
+                        )
+                ) {
+
+                    setBackground(
+                            Theme.KHAKI_BEIGE
+                    );
+
+                    setForeground(
+                            Theme.BLACK
+                    );
+
+
+                } else {
+
+                    setBackground(
+                            row % 2 == 0
+                                    ? Theme.WHITE
+                                    : Theme.ALMOND_CREAM
+                    );
+
+                    setForeground(
+                            Theme.TEXT
+                    );
+                }
+            }
+
+
+            return component;
+        }
+    }
+
+
+    // =========================================================
+    // STATUS RENDERER
+    // =========================================================
+
+    private static class StatusRenderer
+            extends DefaultTableCellRenderer {
+
+
+        @Override
+        public Component
+        getTableCellRendererComponent(
+                JTable table,
+                Object value,
+                boolean selected,
+                boolean focused,
+                int row,
+                int column
+        ) {
+
+            Component component =
+                    super
+                            .getTableCellRendererComponent(
+                                    table,
+                                    value,
+                                    selected,
+                                    focused,
+                                    row,
+                                    column
+                            );
+
+
+            setHorizontalAlignment(
+                    SwingConstants.CENTER
+            );
+
+
+            if (
+                    !selected
+            ) {
+
+                String text =
+                        value == null
+                                ? ""
+                                : value.toString()
+                                .toUpperCase();
+
+
+                if (
+                        text.contains(
+                                "IN PROGRESS"
+                        )
+                ) {
+
+                    setBackground(
+                            Theme.JET_BLACK
+                    );
+
+                    setForeground(
+                            Theme.LIGHT_TEXT
+                    );
+
+
+                } else if (
+                        text.contains(
+                                "ASSIGNED"
+                        )
+                ) {
+
+                    setBackground(
+                            Theme.KHAKI_BEIGE
+                    );
+
+                    setForeground(
+                            Theme.BLACK
+                    );
+
+
+                } else if (
+                        text.contains(
+                                "RESOLVED"
+                        )
+                ) {
+
+                    setBackground(
+                            Theme.STONE_BROWN
+                    );
+
+                    setForeground(
+                            Theme.LIGHT_TEXT
+                    );
+
+
+                } else {
+
+                    setBackground(
+                            row % 2 == 0
+                                    ? Theme.WHITE
+                                    : Theme.ALMOND_CREAM
+                    );
+
+                    setForeground(
+                            Theme.TEXT
+                    );
+                }
+            }
+
+
+            return component;
+        }
+    }
+
+
+    // =========================================================
+    // CLEANUP
+    // =========================================================
+
+    @Override
+    public void removeNotify() {
+
+        stopAnimations();
+
+        super.removeNotify();
     }
 }

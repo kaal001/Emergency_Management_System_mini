@@ -1,5 +1,8 @@
 package ui;
 
+import enums.EmergencyStatus;
+import enums.EmergencyType;
+import enums.Priority;
 import model.Emergency;
 
 import javax.swing.*;
@@ -7,39 +10,97 @@ import java.awt.*;
 
 public class EmergencyDetailsDialog extends JDialog {
 
+    // =========================================================
+    // DATA
+    // =========================================================
+
+    private final Emergency emergency;
+
+
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
+
     public EmergencyDetailsDialog(
-            JFrame parent,
+            JFrame owner,
             Emergency emergency
     ) {
 
         super(
-                parent,
+                owner,
                 "Emergency Details",
                 true
         );
 
+        this.emergency = emergency;
+
+        initializeDialog();
+
+        buildUI();
+    }
+
+
+    // =========================================================
+    // DIALOG SETUP
+    // =========================================================
+
+    private void initializeDialog() {
+
         setSize(
-                560,
-                540
+                610,
+                650
         );
 
         setMinimumSize(
                 new Dimension(
-                        560,
-                        540
+                        610,
+                        650
                 )
         );
 
-        setLocationRelativeTo(
-                parent
+        setResizable(
+                false
         );
 
-        setLayout(
-                new BorderLayout()
+        setDefaultCloseOperation(
+                JDialog.DISPOSE_ON_CLOSE
+        );
+
+        setLocationRelativeTo(
+                getOwner()
         );
 
         getContentPane().setBackground(
                 Theme.BACKGROUND
+        );
+    }
+
+
+    // =========================================================
+    // BUILD UI
+    // =========================================================
+
+    private void buildUI() {
+
+        JPanel mainPanel =
+                new JPanel(
+                        new BorderLayout(
+                                0,
+                                14
+                        )
+                );
+
+        mainPanel.setBackground(
+                Theme.BACKGROUND
+        );
+
+        mainPanel.setBorder(
+                BorderFactory.createEmptyBorder(
+                        20,
+                        22,
+                        18,
+                        22
+                )
         );
 
 
@@ -52,17 +113,37 @@ public class EmergencyDetailsDialog extends JDialog {
                         new BorderLayout()
                 );
 
-        headerPanel.setBackground(
-                Theme.HEADER
+        headerPanel.setOpaque(
+                false
         );
 
-        headerPanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        18,
-                        24,
-                        18,
-                        24
+
+        JPanel titlePanel =
+                new JPanel();
+
+        titlePanel.setLayout(
+                new BoxLayout(
+                        titlePanel,
+                        BoxLayout.Y_AXIS
                 )
+        );
+
+        titlePanel.setOpaque(
+                false
+        );
+
+
+        JLabel moduleLabel =
+                new JLabel(
+                        "EMERGENCY RECORD"
+                );
+
+        moduleLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        moduleLabel.setForeground(
+                Theme.STONE_BROWN
         );
 
 
@@ -76,151 +157,320 @@ public class EmergencyDetailsDialog extends JDialog {
         );
 
         titleLabel.setForeground(
-                Theme.LIGHT_TEXT
+                Theme.TEXT
+        );
+
+
+        titlePanel.add(
+                moduleLabel
+        );
+
+        titlePanel.add(
+                Box.createVerticalStrut(
+                        3
+                )
+        );
+
+        titlePanel.add(
+                titleLabel
         );
 
 
         headerPanel.add(
-                titleLabel,
+                titlePanel,
                 BorderLayout.WEST
         );
 
 
-        add(
+        // =====================================================
+        // CURRENT STATUS
+        // =====================================================
+
+        JPanel statusPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                6,
+                                5
+                        )
+                );
+
+        statusPanel.setOpaque(
+                false
+        );
+
+
+        JLabel statusDot =
+                new JLabel(
+                        "●"
+                );
+
+        statusDot.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        statusDot.setForeground(
+                Theme.ACCENT
+        );
+
+
+        JLabel statusText =
+                new JLabel(
+                        formatStatus(
+                                emergency.getStatus()
+                        )
+                );
+
+        statusText.setFont(
+                Theme.NORMAL_FONT
+        );
+
+        statusText.setForeground(
+                Theme.STONE_BROWN
+        );
+
+
+        statusPanel.add(
+                statusDot
+        );
+
+        statusPanel.add(
+                statusText
+        );
+
+
+        headerPanel.add(
+                statusPanel,
+                BorderLayout.EAST
+        );
+
+
+        mainPanel.add(
                 headerPanel,
                 BorderLayout.NORTH
         );
 
 
         // =====================================================
-        // MAIN CONTENT
+        // CONTENT PANEL
         // =====================================================
 
-        JPanel mainPanel =
-                new JPanel(
-                        new BorderLayout(
-                                0,
-                                15
-                        )
+        JPanel contentPanel =
+                new JPanel();
+
+        contentPanel.setLayout(
+                new BoxLayout(
+                        contentPanel,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        contentPanel.setOpaque(
+                false
+        );
+
+
+        // =====================================================
+        // INCIDENT INFORMATION CARD
+        // =====================================================
+
+        JPanel detailsCard =
+                createCard();
+
+        detailsCard.setLayout(
+                new BorderLayout(
+                        0,
+                        12
+                )
+        );
+
+
+        JLabel detailsTitle =
+                new JLabel(
+                        "INCIDENT INFORMATION"
                 );
 
-        mainPanel.setBackground(
-                Theme.BACKGROUND
+        detailsTitle.setFont(
+                Theme.SECTION_FONT
         );
 
-        mainPanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        22,
-                        25,
-                        15,
-                        25
-                )
+        detailsTitle.setForeground(
+                Theme.TEXT
         );
 
 
-        // =====================================================
-        // INFORMATION PANEL
-        // =====================================================
-
-        JPanel informationPanel =
-                new JPanel(
-                        new GridLayout(
-                                4,
-                                4,
-                                12,
-                                12
-                        )
-                );
-
-        informationPanel.setBackground(
-                Theme.BACKGROUND
-        );
-
-
-        addDetail(
-                informationPanel,
-                "Emergency ID",
-                emergency.getEmergencyId()
-        );
-
-        addDetail(
-                informationPanel,
-                "Type",
-                formatValue(
-                        emergency.getType()
-                )
-        );
-
-        addDetail(
-                informationPanel,
-                "Priority",
-                formatValue(
-                        emergency.getPriority()
-                )
-        );
-
-        addDetail(
-                informationPanel,
-                "Status",
-                formatValue(
-                        emergency.getStatus()
-                )
-        );
-
-        addDetail(
-                informationPanel,
-                "Location",
-                emergency.getLocation()
-        );
-
-        addDetail(
-                informationPanel,
-                "Assigned Team",
-                emergency.getAssignedTeamId()
-                        == null
-                        ? "Not Assigned"
-                        : emergency.getAssignedTeamId()
-        );
-
-        addDetail(
-                informationPanel,
-                "Date / Time",
-                emergency.getDateTime()
-        );
-
-        addDetail(
-                informationPanel,
-                "Record Type",
-                "Emergency Incident"
-        );
-
-
-        mainPanel.add(
-                informationPanel,
+        detailsCard.add(
+                detailsTitle,
                 BorderLayout.NORTH
         );
 
 
-        // =====================================================
-        // DESCRIPTION
-        // =====================================================
-
-        JPanel descriptionPanel =
+        JPanel informationPanel =
                 new JPanel(
-                        new BorderLayout(
-                                0,
-                                8
-                        )
+                        new GridBagLayout()
                 );
 
-        descriptionPanel.setBackground(
-                Theme.BACKGROUND
+        informationPanel.setOpaque(
+                false
+        );
+
+
+        GridBagConstraints gbc =
+                new GridBagConstraints();
+
+        gbc.insets =
+                new Insets(
+                        6,
+                        4,
+                        6,
+                        4
+                );
+
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+        gbc.anchor =
+                GridBagConstraints.WEST;
+
+
+        // =====================================================
+        // INFORMATION
+        // =====================================================
+
+        addInfoRow(
+                informationPanel,
+                gbc,
+                0,
+                "EMERGENCY ID",
+                safeText(
+                        emergency.getEmergencyId()
+                )
+        );
+
+
+        addInfoRow(
+                informationPanel,
+                gbc,
+                1,
+                "TYPE",
+                formatEmergencyType(
+                        emergency.getType()
+                )
+        );
+
+
+        addInfoRow(
+                informationPanel,
+                gbc,
+                2,
+                "PRIORITY",
+                formatPriority(
+                        emergency.getPriority()
+                )
+        );
+
+
+        addInfoRow(
+                informationPanel,
+                gbc,
+                3,
+                "STATUS",
+                formatStatus(
+                        emergency.getStatus()
+                )
+        );
+
+
+        addInfoRow(
+                informationPanel,
+                gbc,
+                4,
+                "LOCATION",
+                safeText(
+                        emergency.getLocation()
+                )
+        );
+
+
+        String assignedTeam =
+                emergency.getAssignedTeamId();
+
+        if (
+                assignedTeam == null
+                        || assignedTeam
+                        .trim()
+                        .isEmpty()
+        ) {
+
+            assignedTeam =
+                    "Not Assigned";
+        }
+
+
+        addInfoRow(
+                informationPanel,
+                gbc,
+                5,
+                "ASSIGNED TEAM",
+                assignedTeam
+        );
+
+
+        addInfoRow(
+                informationPanel,
+                gbc,
+                6,
+                "DATE / TIME",
+                safeText(
+                        emergency.getDateTime()
+                )
+        );
+
+
+        detailsCard.add(
+                informationPanel,
+                BorderLayout.CENTER
+        );
+
+
+        contentPanel.add(
+                detailsCard
+        );
+
+
+        // =====================================================
+        // GAP
+        // =====================================================
+
+        contentPanel.add(
+                Box.createVerticalStrut(
+                        14
+                )
+        );
+
+
+        // =====================================================
+        // DESCRIPTION CARD
+        // =====================================================
+
+        JPanel descriptionCard =
+                createCard();
+
+        descriptionCard.setLayout(
+                new BorderLayout(
+                        0,
+                        9
+                )
         );
 
 
         JLabel descriptionTitle =
                 new JLabel(
-                        "Description"
+                        "DESCRIPTION"
                 );
 
         descriptionTitle.setFont(
@@ -232,14 +482,24 @@ public class EmergencyDetailsDialog extends JDialog {
         );
 
 
-        JTextArea descriptionArea =
-                new JTextArea();
-
-        descriptionArea.setText(
-                emergency.getDescription()
+        descriptionCard.add(
+                descriptionTitle,
+                BorderLayout.NORTH
         );
 
+
+        JTextArea descriptionArea =
+                new JTextArea(
+                        safeText(
+                                emergency.getDescription()
+                        )
+                );
+
         descriptionArea.setEditable(
+                false
+        );
+
+        descriptionArea.setFocusable(
                 false
         );
 
@@ -260,82 +520,110 @@ public class EmergencyDetailsDialog extends JDialog {
         );
 
         descriptionArea.setBackground(
-                Theme.ALMOND_CREAM
+                Theme.WHITE
         );
 
         descriptionArea.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                Theme.KHAKI_BEIGE
-                        ),
-                        BorderFactory.createEmptyBorder(
-                                10,
-                                10,
-                                10,
-                                10
-                        )
+                BorderFactory.createEmptyBorder(
+                        10,
+                        10,
+                        10,
+                        10
                 )
         );
 
 
-        JScrollPane descriptionScrollPane =
+        JScrollPane descriptionScroll =
                 new JScrollPane(
                         descriptionArea
                 );
 
-        descriptionScrollPane.setPreferredSize(
+        descriptionScroll.setBorder(
+                Theme.createRoundedBorder(
+                        Theme.STONE_BROWN,
+                        11,
+                        1,
+                        1
+                )
+        );
+
+        descriptionScroll.setPreferredSize(
                 new Dimension(
                         0,
-                        130
+                        125
                 )
         );
 
 
-        descriptionPanel.add(
-                descriptionTitle,
-                BorderLayout.NORTH
-        );
-
-        descriptionPanel.add(
-                descriptionScrollPane,
+        descriptionCard.add(
+                descriptionScroll,
                 BorderLayout.CENTER
         );
+
+
+        contentPanel.add(
+                descriptionCard
+        );
+
+
+        // =====================================================
+        // CONTENT SCROLL
+        // =====================================================
+
+        JScrollPane contentScroll =
+                new JScrollPane(
+                        contentPanel
+                );
+
+        contentScroll.setBorder(
+                BorderFactory.createEmptyBorder()
+        );
+
+        contentScroll.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        contentScroll.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        );
+
+        contentScroll.getViewport()
+                .setOpaque(
+                        false
+                );
 
 
         mainPanel.add(
-                descriptionPanel,
-                BorderLayout.CENTER
-        );
-
-
-        add(
-                mainPanel,
+                contentScroll,
                 BorderLayout.CENTER
         );
 
 
         // =====================================================
-        // BOTTOM BUTTON
+        // FOOTER
         // =====================================================
 
-        JPanel bottomPanel =
+        JPanel footerPanel =
                 new JPanel(
-                        new FlowLayout(
-                                FlowLayout.RIGHT
-                        )
+                        new BorderLayout()
                 );
 
-        bottomPanel.setBackground(
-                Theme.BACKGROUND
+        footerPanel.setOpaque(
+                false
         );
 
-        bottomPanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        5,
-                        20,
-                        15,
-                        20
-                )
+
+        JLabel footerLabel =
+                new JLabel(
+                        "READ-ONLY INCIDENT VIEW"
+                );
+
+        footerLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        footerLabel.setForeground(
+                Theme.MUTED_TEXT
         );
 
 
@@ -344,7 +632,7 @@ public class EmergencyDetailsDialog extends JDialog {
                         "CLOSE"
                 );
 
-        Theme.styleSecondaryButton(
+        Theme.styleHeaderButton(
                 closeButton
         );
 
@@ -354,39 +642,87 @@ public class EmergencyDetailsDialog extends JDialog {
         );
 
 
-        bottomPanel.add(
-                closeButton
+        footerPanel.add(
+                footerLabel,
+                BorderLayout.WEST
+        );
+
+        footerPanel.add(
+                closeButton,
+                BorderLayout.EAST
         );
 
 
-        add(
-                bottomPanel,
+        mainPanel.add(
+                footerPanel,
                 BorderLayout.SOUTH
+        );
+
+
+        // =====================================================
+        // FINAL
+        // =====================================================
+
+        setContentPane(
+                mainPanel
+        );
+
+        getRootPane().setDefaultButton(
+                closeButton
         );
     }
 
 
     // =========================================================
-    // ADD DETAIL
+    // CREATE CARD
     // =========================================================
 
-    private void addDetail(
+    private JPanel createCard() {
+
+        JPanel card =
+                new RoundedPanel();
+
+        card.setBorder(
+                BorderFactory.createCompoundBorder(
+                        Theme.createRoundedBorder(
+                                Theme.KHAKI_BEIGE,
+                                16,
+                                1,
+                                1
+                        ),
+                        BorderFactory.createEmptyBorder(
+                                15,
+                                17,
+                                15,
+                                17
+                        )
+                )
+        );
+
+        return card;
+    }
+
+
+    // =========================================================
+    // INFO ROW
+    // =========================================================
+
+    private void addInfoRow(
             JPanel panel,
+            GridBagConstraints gbc,
+            int row,
             String labelText,
-            String value
+            String valueText
     ) {
 
-        JPanel detailPanel =
-                new JPanel(
-                        new BorderLayout(
-                                0,
-                                3
-                        )
-                );
+        gbc.gridy =
+                row;
 
-        detailPanel.setBackground(
-                Theme.BACKGROUND
-        );
+        gbc.gridx =
+                0;
+
+        gbc.weightx =
+                0.0;
 
 
         JLabel label =
@@ -402,90 +738,307 @@ public class EmergencyDetailsDialog extends JDialog {
                 Theme.MUTED_TEXT
         );
 
-
-        JLabel valueLabel =
-                new JLabel(
-                        value == null
-                                ? "N/A"
-                                : value
-                );
-
-        valueLabel.setFont(
-                Theme.NORMAL_FONT
-        );
-
-        valueLabel.setForeground(
-                Theme.TEXT
-        );
-
-
-        detailPanel.add(
-                label,
-                BorderLayout.NORTH
-        );
-
-        detailPanel.add(
-                valueLabel,
-                BorderLayout.CENTER
+        label.setPreferredSize(
+                new Dimension(
+                        125,
+                        27
+                )
         );
 
 
         panel.add(
-                detailPanel
+                label,
+                gbc
+        );
+
+
+        gbc.gridx =
+                1;
+
+        gbc.weightx =
+                1.0;
+
+
+        JLabel value =
+                new JLabel(
+                        valueText
+                );
+
+        value.setFont(
+                Theme.NORMAL_FONT
+        );
+
+        value.setForeground(
+                Theme.TEXT
+        );
+
+
+        panel.add(
+                value,
+                gbc
         );
     }
 
 
     // =========================================================
-    // FORMAT VALUE
+    // FORMAT TYPE
     // =========================================================
 
-    private String formatValue(
-            Object value
+    private String formatEmergencyType(
+            EmergencyType type
     ) {
 
-        if (value == null) {
-            return "N/A";
+        if (
+                type == null
+        ) {
+
+            return "-";
         }
 
+
         String text =
-                value.toString()
+                type.toString()
                         .replace(
                                 "_",
                                 " "
                         )
                         .toLowerCase();
 
-        String[] words =
+
+        return capitalizeWords(
+                text
+        );
+    }
+
+
+    // =========================================================
+    // FORMAT PRIORITY
+    // =========================================================
+
+    private String formatPriority(
+            Priority priority
+    ) {
+
+        if (
+                priority == null
+        ) {
+
+            return "-";
+        }
+
+
+        String text =
+                priority.toString()
+                        .replace(
+                                "_",
+                                " "
+                        )
+                        .toLowerCase();
+
+
+        return capitalizeWords(
+                text
+        );
+    }
+
+
+    // =========================================================
+    // FORMAT STATUS
+    // =========================================================
+
+    private String formatStatus(
+            EmergencyStatus status
+    ) {
+
+        if (
+                status == null
+        ) {
+
+            return "-";
+        }
+
+
+        String text =
+                status.toString()
+                        .replace(
+                                "_",
+                                " "
+                        )
+                        .toLowerCase();
+
+
+        return capitalizeWords(
+                text
+        );
+    }
+
+
+    // =========================================================
+    // CAPITALIZE WORDS
+    // =========================================================
+
+    private String capitalizeWords(
+            String text
+    ) {
+
+        String[] parts =
                 text.split(
                         " "
                 );
 
+
         StringBuilder result =
                 new StringBuilder();
 
-        for (String word : words) {
 
-            if (word.isEmpty()) {
+        for (
+                String part
+                : parts
+        ) {
+
+            if (
+                    part.isEmpty()
+            ) {
+
                 continue;
             }
 
+
             result.append(
                     Character.toUpperCase(
-                            word.charAt(0)
+                            part.charAt(0)
                     )
             );
 
-            if (word.length() > 1) {
+
+            if (
+                    part.length() > 1
+            ) {
 
                 result.append(
-                        word.substring(1)
+                        part.substring(
+                                1
+                        )
                 );
             }
 
-            result.append(" ");
+
+            result.append(
+                    " "
+            );
         }
 
-        return result.toString().trim();
+
+        return result.toString()
+                .trim();
+    }
+
+
+    // =========================================================
+    // SAFE TEXT
+    // =========================================================
+
+    private String safeText(
+            String text
+    ) {
+
+        if (
+                text == null
+                        || text.trim().isEmpty()
+        ) {
+
+            return "-";
+        }
+
+
+        return text.trim();
+    }
+
+
+    // =========================================================
+    // ROUNDED PANEL
+    // =========================================================
+
+    private static class RoundedPanel
+            extends JPanel {
+
+
+        public RoundedPanel() {
+
+            setOpaque(
+                    false
+            );
+        }
+
+
+        @Override
+        protected void paintComponent(
+                Graphics graphics
+        ) {
+
+            Graphics2D g2 =
+                    (Graphics2D)
+                            graphics.create();
+
+            try {
+
+                g2.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON
+                );
+
+
+                // -------------------------------------------------
+                // SHADOW
+                // -------------------------------------------------
+
+                g2.setColor(
+                        new Color(
+                                Theme.BLACK.getRed(),
+                                Theme.BLACK.getGreen(),
+                                Theme.BLACK.getBlue(),
+                                16
+                        )
+                );
+
+
+                g2.fillRoundRect(
+                        3,
+                        4,
+                        getWidth() - 4,
+                        getHeight() - 4,
+                        18,
+                        18
+                );
+
+
+                // -------------------------------------------------
+                // BODY
+                // -------------------------------------------------
+
+                g2.setColor(
+                        Theme.ALMOND_CREAM
+                );
+
+
+                g2.fillRoundRect(
+                        0,
+                        0,
+                        getWidth() - 4,
+                        getHeight() - 4,
+                        18,
+                        18
+                );
+
+            } finally {
+
+                g2.dispose();
+            }
+
+
+            super.paintComponent(
+                    graphics
+            );
+        }
     }
 }

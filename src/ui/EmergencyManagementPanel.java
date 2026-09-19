@@ -6,6 +6,7 @@ import enums.Priority;
 import manager.AssignmentManager;
 import manager.EmergencyManager;
 import manager.TeamManager;
+import model.Assignment;
 import model.Emergency;
 import model.ResponseTeam;
 
@@ -16,7 +17,6 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import model.Assignment;
 
 public class EmergencyManagementPanel extends JPanel {
 
@@ -147,32 +147,28 @@ public class EmergencyManagementPanel extends JPanel {
                         new BorderLayout()
                 );
 
-        headerPanel.setBackground(
-                Theme.BACKGROUND
-        );
+        headerPanel.setOpaque(false);
 
         headerPanel.setBorder(
                 BorderFactory.createEmptyBorder(
-                        22,
-                        25,
-                        10,
-                        25
+                        12,
+                        18,
+                        8,
+                        18
                 )
         );
 
-
         JPanel titlePanel =
-                new JPanel(
-                        new BorderLayout(
-                                0,
-                                5
-                        )
-                );
+                new JPanel();
 
-        titlePanel.setBackground(
-                Theme.BACKGROUND
+        titlePanel.setLayout(
+                new BoxLayout(
+                        titlePanel,
+                        BoxLayout.Y_AXIS
+                )
         );
 
+        titlePanel.setOpaque(false);
 
         JLabel titleLabel =
                 new JLabel(
@@ -187,43 +183,87 @@ public class EmergencyManagementPanel extends JPanel {
                 Theme.TEXT
         );
 
-
         JLabel subtitleLabel =
                 new JLabel(
                         "Record and manage emergency incidents."
                 );
 
         subtitleLabel.setFont(
-                Theme.NORMAL_FONT
+                Theme.SMALL_FONT
         );
 
         subtitleLabel.setForeground(
                 Theme.MUTED_TEXT
         );
 
-
         titlePanel.add(
-                titleLabel,
-                BorderLayout.NORTH
+                titleLabel
         );
 
         titlePanel.add(
-                subtitleLabel,
-                BorderLayout.CENTER
+                Box.createVerticalStrut(2)
         );
 
+        titlePanel.add(
+                subtitleLabel
+        );
 
         headerPanel.add(
                 titlePanel,
                 BorderLayout.WEST
         );
 
+        JPanel livePanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                6,
+                                4
+                        )
+                );
+
+        livePanel.setOpaque(false);
+
+        JLabel liveDot =
+                new JLabel("●");
+
+        liveDot.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        liveDot.setForeground(
+                Theme.ACCENT
+        );
+
+        JLabel liveLabel =
+                new JLabel(
+                        "LIVE INCIDENT CONTROL"
+                );
+
+        liveLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        liveLabel.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+        livePanel.add(liveDot);
+        livePanel.add(liveLabel);
+
+        headerPanel.add(
+                livePanel,
+                BorderLayout.EAST
+        );
 
         add(
                 headerPanel,
                 BorderLayout.NORTH
         );
-
 
         // =====================================================
         // MAIN SPLIT PANE
@@ -237,39 +277,44 @@ public class EmergencyManagementPanel extends JPanel {
                 );
 
         splitPane.setResizeWeight(
-                0.42
+                0.40
+        );
+
+        splitPane.setDividerLocation(
+                360
         );
 
         splitPane.setDividerSize(
-                8
+                7
         );
 
-        splitPane.setBorder(
-                BorderFactory.createEmptyBorder(
-                        0,
-                        20,
-                        20,
-                        20
-                )
+        splitPane.setContinuousLayout(
+                true
         );
 
+        splitPane.setBorder(null);
+
+        // Critical for responsive resizing: neither side gets a
+        // large preferred minimum width that can push the other side away.
+        splitPane.getLeftComponent().setMinimumSize(
+                new Dimension(280, 0)
+        );
+
+        splitPane.getRightComponent().setMinimumSize(
+                new Dimension(260, 0)
+        );
 
         add(
                 splitPane,
                 BorderLayout.CENTER
         );
 
-
         // =====================================================
         // BOTTOM ACTION AREA
         // =====================================================
 
-        JPanel bottomWrapper =
-                createBottomActionPanel();
-
-
         add(
-                bottomWrapper,
+                createBottomActionPanel(),
                 BorderLayout.SOUTH
         );
     }
@@ -281,24 +326,35 @@ public class EmergencyManagementPanel extends JPanel {
 
     private JPanel createFormPanel() {
 
+        // =====================================================
+        // OUTER CARD
+        // =====================================================
+
         JPanel outerPanel =
                 new JPanel(
-                        new BorderLayout()
+                        new BorderLayout(0, 6)
                 );
 
         outerPanel.setBackground(
-                Theme.BACKGROUND
+                Theme.ALMOND_CREAM
+        );
+
+        outerPanel.setMinimumSize(
+                new Dimension(280, 0)
         );
 
         outerPanel.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                Theme.KHAKI_BEIGE
+                        Theme.createRoundedBorder(
+                                Theme.KHAKI_BEIGE,
+                                14,
+                                1,
+                                1
                         ),
                         BorderFactory.createEmptyBorder(
+                                10,
                                 12,
-                                12,
-                                12,
+                                10,
                                 12
                         )
                 )
@@ -322,11 +378,10 @@ public class EmergencyManagementPanel extends JPanel {
                 BorderFactory.createEmptyBorder(
                         0,
                         3,
-                        10,
+                        5,
                         3
                 )
         );
-
 
         outerPanel.add(
                 formTitle,
@@ -334,31 +389,26 @@ public class EmergencyManagementPanel extends JPanel {
         );
 
 
+        // =====================================================
+        // ACTUAL FORM CONTENT
+        // =====================================================
+
         JPanel formPanel =
-                new JPanel();
+                new JPanel(
+                        new GridBagLayout()
+                );
 
-        formPanel.setBackground(
-                Theme.BACKGROUND
-        );
-
-        formPanel.setLayout(
-                new GridBagLayout()
-        );
+        formPanel.setOpaque(false);
 
 
         GridBagConstraints gbc =
                 new GridBagConstraints();
 
         gbc.insets =
-                new Insets(
-                        7,
-                        7,
-                        7,
-                        7
-                );
+                new Insets(4, 4, 4, 4);
 
         gbc.anchor =
-                GridBagConstraints.WEST;
+                GridBagConstraints.NORTHWEST;
 
         gbc.fill =
                 GridBagConstraints.HORIZONTAL;
@@ -376,10 +426,11 @@ public class EmergencyManagementPanel extends JPanel {
         emergencyIdField =
                 new JTextField();
 
-        emergencyIdField.setEditable(
-                false
-        );
+        emergencyIdField.setEditable(false);
 
+        styleTextField(
+                emergencyIdField
+        );
 
         addFormRow(
                 formPanel,
@@ -399,17 +450,18 @@ public class EmergencyManagementPanel extends JPanel {
                         "Emergency Type"
                 );
 
-
         typeComboBox =
                 new JComboBox<>(
                         EmergencyType.values()
                 );
 
+        styleComboBox(
+                typeComboBox
+        );
 
         typeComboBox.addActionListener(
                 e -> updateGeneratedId()
         );
-
 
         addFormRow(
                 formPanel,
@@ -429,12 +481,14 @@ public class EmergencyManagementPanel extends JPanel {
                         "Priority"
                 );
 
-
         priorityComboBox =
                 new JComboBox<>(
                         Priority.values()
                 );
 
+        styleComboBox(
+                priorityComboBox
+        );
 
         addFormRow(
                 formPanel,
@@ -454,10 +508,12 @@ public class EmergencyManagementPanel extends JPanel {
                         "Location"
                 );
 
-
         locationField =
                 new JTextField();
 
+        styleTextField(
+                locationField
+        );
 
         addFormRow(
                 formPanel,
@@ -477,14 +533,14 @@ public class EmergencyManagementPanel extends JPanel {
                         "Date / Time"
                 );
 
-
         dateTimeField =
                 new JTextField();
 
-        dateTimeField.setEditable(
-                false
-        );
+        dateTimeField.setEditable(false);
 
+        styleTextField(
+                dateTimeField
+        );
 
         addFormRow(
                 formPanel,
@@ -504,16 +560,16 @@ public class EmergencyManagementPanel extends JPanel {
                         "Status"
                 );
 
-
         statusComboBox =
                 new JComboBox<>(
                         EmergencyStatus.values()
                 );
 
-        statusComboBox.setEnabled(
-                false
-        );
+        statusComboBox.setEnabled(false);
 
+        styleComboBox(
+                statusComboBox
+        );
 
         addFormRow(
                 formPanel,
@@ -533,12 +589,23 @@ public class EmergencyManagementPanel extends JPanel {
                         "Description"
                 );
 
-
         descriptionArea =
                 new JTextArea(
-                        7,
-                        25
+                        5,
+                        20
                 );
+
+        descriptionArea.setFont(
+                Theme.NORMAL_FONT
+        );
+
+        descriptionArea.setForeground(
+                Theme.TEXT
+        );
+
+        descriptionArea.setBackground(
+                Theme.WHITE
+        );
 
         descriptionArea.setLineWrap(
                 true
@@ -548,42 +615,52 @@ public class EmergencyManagementPanel extends JPanel {
                 true
         );
 
+        descriptionArea.setBorder(
+                BorderFactory.createEmptyBorder(
+                        5,
+                        6,
+                        5,
+                        6
+                )
+        );
 
         JScrollPane descriptionScrollPane =
                 new JScrollPane(
                         descriptionArea
                 );
 
+        descriptionScrollPane.setBorder(
+                Theme.createRoundedBorder(
+                        Theme.STONE_BROWN,
+                        10,
+                        1,
+                        0
+                )
+        );
+
+        descriptionScrollPane.setPreferredSize(
+                new Dimension(
+                        0,
+                        85
+                )
+        );
 
         gbc.gridx = 0;
-
         gbc.gridy = 6;
-
-        gbc.weightx = 0;
-
-        gbc.weighty = 1.0;
-
-        gbc.fill =
-                GridBagConstraints.HORIZONTAL;
-
+        gbc.weightx = 0.0;
+        gbc.weighty = 0.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         formPanel.add(
                 descriptionLabel,
                 gbc
         );
 
-
         gbc.gridx = 1;
-
         gbc.gridy = 6;
-
         gbc.weightx = 1.0;
-
-        gbc.weighty = 1.0;
-
-        gbc.fill =
-                GridBagConstraints.BOTH;
-
+        gbc.weighty = 0.0;
+        gbc.fill = GridBagConstraints.BOTH;
 
         formPanel.add(
                 descriptionScrollPane,
@@ -591,13 +668,37 @@ public class EmergencyManagementPanel extends JPanel {
         );
 
 
-        outerPanel.add(
+        // =====================================================
+        // VIEWPORT
+        // =====================================================
+
+        JScrollPane formScrollPane =
                 new JScrollPane(
                         formPanel
-                ),
-                BorderLayout.CENTER
+                );
+
+        formScrollPane.setBorder(
+                BorderFactory.createEmptyBorder()
         );
 
+        formScrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        formScrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        );
+
+        formScrollPane.getViewport()
+                .setOpaque(false);
+
+        formScrollPane.setOpaque(false);
+
+
+        outerPanel.add(
+                formScrollPane,
+                BorderLayout.CENTER
+        );
 
         return outerPanel;
     }
@@ -611,16 +712,16 @@ public class EmergencyManagementPanel extends JPanel {
 
         JPanel panel =
                 new JPanel(
-                        new BorderLayout(
-                                0,
-                                10
-                        )
+                        new BorderLayout(0, 8)
                 );
 
         panel.setBackground(
                 Theme.BACKGROUND
         );
 
+        panel.setMinimumSize(
+                new Dimension(260, 0)
+        );
 
         // =====================================================
         // SEARCH AREA
@@ -628,123 +729,101 @@ public class EmergencyManagementPanel extends JPanel {
 
         JPanel searchPanel =
                 new JPanel(
-                        new BorderLayout(
-                                10,
-                                0
-                        )
+                        new BorderLayout(7, 0)
                 );
 
-        searchPanel.setBackground(
-                Theme.BACKGROUND
-        );
-
+        searchPanel.setOpaque(false);
 
         JLabel searchLabel =
-                new JLabel(
-                        "SEARCH"
-                );
+                new JLabel("SEARCH");
 
         searchLabel.setFont(
-                Theme.NORMAL_FONT
+                Theme.SMALL_FONT
         );
 
         searchLabel.setForeground(
                 Theme.TEXT
         );
 
-
         searchField =
                 new JTextField();
 
+        styleTextField(searchField);
+
+        searchField.setPreferredSize(
+                new Dimension(170, 34)
+        );
+
+        JPanel searchInputPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.LEFT,
+                                0,
+                                0
+                        )
+                );
+
+        searchInputPanel.setOpaque(false);
+
+        searchInputPanel.add(searchField);
 
         JButton searchButton =
-                new JButton(
-                        "SEARCH"
-                );
+                new JButton("SEARCH");
 
-        Theme.stylePrimaryButton(
-                searchButton
-        );
-
+        Theme.stylePrimaryButton(searchButton);
 
         JButton clearSearchButton =
-                new JButton(
-                        "CLEAR"
-                );
+                new JButton("CLEAR");
 
-        Theme.styleSecondaryButton(
-                clearSearchButton
-        );
-
+        Theme.styleSecondaryButton(clearSearchButton);
 
         searchPanel.add(
                 searchLabel,
                 BorderLayout.WEST
         );
 
-
         searchPanel.add(
-                searchField,
+                searchInputPanel,
                 BorderLayout.CENTER
         );
-
 
         JPanel searchButtons =
                 new JPanel(
                         new FlowLayout(
                                 FlowLayout.RIGHT,
-                                8,
+                                5,
                                 0
                         )
                 );
 
-        searchButtons.setBackground(
-                Theme.BACKGROUND
-        );
+        searchButtons.setOpaque(false);
 
-
-        searchButtons.add(
-                searchButton
-        );
-
-        searchButtons.add(
-                clearSearchButton
-        );
-
+        searchButtons.add(searchButton);
+        searchButtons.add(clearSearchButton);
 
         searchPanel.add(
                 searchButtons,
                 BorderLayout.EAST
         );
 
-
         panel.add(
                 searchPanel,
                 BorderLayout.NORTH
         );
-
 
         // =====================================================
         // TABLE
         // =====================================================
 
         String[] columns = {
-
                 "Emergency ID",
-
                 "Type",
-
                 "Priority",
-
                 "Location",
-
                 "Status",
-
                 "Assigned Team",
-
                 "Date / Time"
         };
-
 
         tableModel =
                 new DefaultTableModel(
@@ -762,207 +841,47 @@ public class EmergencyManagementPanel extends JPanel {
                     }
                 };
 
-
         emergencyTable =
                 new JTable(
                         tableModel
                 );
 
+        Theme.styleTable(emergencyTable);
 
-        emergencyTable.setRowHeight(
-                29
-        );
-
-
-        emergencyTable.setSelectionMode(
-                ListSelectionModel.SINGLE_SELECTION
-        );
-
+        emergencyTable.setRowHeight(29);
 
         emergencyTable.setAutoResizeMode(
-                JTable.AUTO_RESIZE_LAST_COLUMN
+                JTable.AUTO_RESIZE_ALL_COLUMNS
         );
 
-
-        emergencyTable.setFillsViewportHeight(
-                true
-        );
-
-
-        emergencyTable.setFont(
-                Theme.NORMAL_FONT
-        );
-
+        emergencyTable.setFillsViewportHeight(true);
 
         emergencyTable.getTableHeader()
-                .setFont(
-                        Theme.NORMAL_FONT
-                );
-
-
-        emergencyTable.getTableHeader()
-                .setBackground(
-                        Theme.SIDEBAR
-                );
-
-
-        emergencyTable.getTableHeader()
-                .setForeground(
-                        Theme.LIGHT_TEXT
-                );
-
-
-        emergencyTable.getTableHeader()
-                .setReorderingAllowed(
-                        false
-                );
-
-
-        emergencyTable.setGridColor(
-                Theme.KHAKI_BEIGE
-        );
-
-
-        emergencyTable.setSelectionBackground(
-                Theme.KHAKI_BEIGE
-        );
-
-
-        emergencyTable.setSelectionForeground(
-                Theme.BLACK
-        );
-
-
-        // =====================================================
-        // TABLE COLUMN WIDTHS
-        // =====================================================
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(0)
-                .setPreferredWidth(
-                        115
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(1)
-                .setPreferredWidth(
-                        110
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(2)
-                .setPreferredWidth(
-                        95
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(3)
-                .setPreferredWidth(
-                        150
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(4)
-                .setPreferredWidth(
-                        105
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(5)
-                .setPreferredWidth(
-                        110
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(6)
-                .setPreferredWidth(
-                        130
-                );
-
-
-        // =====================================================
-        // CENTER ALIGNMENT
-        // =====================================================
-
-        DefaultTableCellRenderer centerRenderer =
-                new DefaultTableCellRenderer();
-
-        centerRenderer.setHorizontalAlignment(
-                SwingConstants.CENTER
-        );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(0)
-                .setCellRenderer(
-                        centerRenderer
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(2)
-                .setCellRenderer(
-                        centerRenderer
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(4)
-                .setCellRenderer(
-                        centerRenderer
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(5)
-                .setCellRenderer(
-                        centerRenderer
-                );
-
-
-        emergencyTable
-                .getColumnModel()
-                .getColumn(6)
-                .setCellRenderer(
-                        centerRenderer
-                );
-
+                .setReorderingAllowed(false);
 
         JScrollPane tableScrollPane =
                 new JScrollPane(
                         emergencyTable
                 );
 
-
         tableScrollPane.setBorder(
-                BorderFactory.createLineBorder(
-                        Theme.KHAKI_BEIGE
+                Theme.createRoundedBorder(
+                        Theme.STONE_BROWN,
+                        12,
+                        1,
+                        1
                 )
         );
 
+        tableScrollPane.getViewport()
+                .setBackground(
+                        Theme.WHITE
+                );
 
         panel.add(
                 tableScrollPane,
                 BorderLayout.CENTER
         );
-
 
         // =====================================================
         // SEARCH ACTIONS
@@ -972,23 +891,18 @@ public class EmergencyManagementPanel extends JPanel {
                 e -> searchEmergencies()
         );
 
-
         searchField.addActionListener(
                 e -> searchEmergencies()
         );
 
-
         clearSearchButton.addActionListener(
                 e -> {
 
-                    searchField.setText(
-                            ""
-                    );
+                    searchField.setText("");
 
                     loadEmergencies();
                 }
         );
-
 
         // =====================================================
         // TABLE ROW SELECTION
@@ -1006,7 +920,6 @@ public class EmergencyManagementPanel extends JPanel {
                         }
                 );
 
-
         return panel;
     }
 
@@ -1019,7 +932,10 @@ public class EmergencyManagementPanel extends JPanel {
 
         JPanel wrapper =
                 new JPanel(
-                        new BorderLayout()
+                        new BorderLayout(
+                                0,
+                                4
+                        )
                 );
 
         wrapper.setBackground(
@@ -1029,23 +945,108 @@ public class EmergencyManagementPanel extends JPanel {
         wrapper.setBorder(
                 BorderFactory.createEmptyBorder(
                         0,
-                        20,
-                        15,
-                        20
+                        18,
+                        10,
+                        18
                 )
         );
 
 
         // =====================================================
-        // CRUD ROW
+        // RESPONSE WORKFLOW
+        // =====================================================
+
+        JPanel workflowPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                8,
+                                0
+                        )
+                );
+
+        workflowPanel.setBackground(
+                Theme.BACKGROUND
+        );
+
+
+        JLabel workflowLabel =
+                new JLabel(
+                        "RESPONSE WORKFLOW"
+                );
+
+        workflowLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        workflowLabel.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+
+        startResponseButton =
+                new JButton(
+                        "START RESPONSE"
+                );
+
+        Theme.stylePrimaryButton(
+                startResponseButton
+        );
+
+
+        resolveButton =
+                new JButton(
+                        "RESOLVE"
+                );
+
+        Theme.stylePrimaryButton(
+                resolveButton
+        );
+
+
+        cancelEmergencyButton =
+                new JButton(
+                        "CANCEL EMERGENCY"
+                );
+
+        Theme.styleDangerButton(
+                cancelEmergencyButton
+        );
+
+
+        workflowPanel.add(
+                workflowLabel
+        );
+
+        workflowPanel.add(
+                startResponseButton
+        );
+
+        workflowPanel.add(
+                resolveButton
+        );
+
+        workflowPanel.add(
+                cancelEmergencyButton
+        );
+
+
+        wrapper.add(
+                workflowPanel,
+                BorderLayout.NORTH
+        );
+
+
+        // =====================================================
+        // CRUD ROW - ALWAYS AT THE BOTTOM
         // =====================================================
 
         JPanel crudPanel =
                 new JPanel(
                         new FlowLayout(
                                 FlowLayout.RIGHT,
-                                10,
-                                5
+                                8,
+                                0
                         )
                 );
 
@@ -1113,92 +1114,7 @@ public class EmergencyManagementPanel extends JPanel {
 
         wrapper.add(
                 crudPanel,
-                BorderLayout.NORTH
-        );
-
-
-        // =====================================================
-        // WORKFLOW ROW
-        // =====================================================
-
-        JPanel workflowPanel =
-                new JPanel(
-                        new FlowLayout(
-                                FlowLayout.RIGHT,
-                                10,
-                                5
-                        )
-                );
-
-        workflowPanel.setBackground(
-                Theme.BACKGROUND
-        );
-
-
-        JLabel workflowLabel =
-                new JLabel(
-                        "RESPONSE WORKFLOW:"
-                );
-
-        workflowLabel.setFont(
-                Theme.SMALL_FONT
-        );
-
-        workflowLabel.setForeground(
-                Theme.MUTED_TEXT
-        );
-
-
-        startResponseButton =
-                new JButton(
-                        "START RESPONSE"
-                );
-
-        Theme.stylePrimaryButton(
-                startResponseButton
-        );
-
-
-        resolveButton =
-                new JButton(
-                        "RESOLVE"
-                );
-
-        Theme.stylePrimaryButton(
-                resolveButton
-        );
-
-
-        cancelEmergencyButton =
-                new JButton(
-                        "CANCEL EMERGENCY"
-                );
-
-        Theme.styleDangerButton(
-                cancelEmergencyButton
-        );
-
-
-        workflowPanel.add(
-                workflowLabel
-        );
-
-        workflowPanel.add(
-                startResponseButton
-        );
-
-        workflowPanel.add(
-                resolveButton
-        );
-
-        workflowPanel.add(
-                cancelEmergencyButton
-        );
-
-
-        wrapper.add(
-                workflowPanel,
-                BorderLayout.CENTER
+                BorderLayout.SOUTH
         );
 
 
@@ -1210,39 +1126,31 @@ public class EmergencyManagementPanel extends JPanel {
                 e -> addEmergency()
         );
 
-
         updateButton.addActionListener(
                 e -> updateEmergency()
         );
-
 
         deleteButton.addActionListener(
                 e -> deleteEmergency()
         );
 
-
         clearFormButton.addActionListener(
                 e -> clearForm()
         );
-
 
         startResponseButton.addActionListener(
                 e -> startResponse()
         );
 
-
         resolveButton.addActionListener(
                 e -> resolveEmergency()
         );
-
 
         cancelEmergencyButton.addActionListener(
                 e -> cancelEmergency()
         );
 
-
         updateWorkflowButtons();
-
 
         return wrapper;
     }
@@ -1424,8 +1332,6 @@ public class EmergencyManagementPanel extends JPanel {
 
                     assignedTeamId =
                             team.getTeamId();
-
-
                 }
             }
         }
@@ -2647,6 +2553,70 @@ public class EmergencyManagementPanel extends JPanel {
 
 
     // =========================================================
+    // TEXT FIELD STYLE
+    // =========================================================
+
+    private void styleTextField(
+            JTextField field
+    ) {
+
+        field.setFont(
+                Theme.NORMAL_FONT
+        );
+
+        field.setForeground(
+                Theme.TEXT
+        );
+
+        field.setBackground(
+                Theme.WHITE
+        );
+
+        field.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(
+                                Theme.STONE_BROWN
+                        ),
+                        BorderFactory.createEmptyBorder(
+                                6,
+                                8,
+                                6,
+                                8
+                        )
+                )
+        );
+    }
+
+
+    // =========================================================
+    // COMBO BOX STYLE
+    // =========================================================
+
+    private void styleComboBox(
+            JComboBox<?> comboBox
+    ) {
+
+        comboBox.setFont(
+                Theme.NORMAL_FONT
+        );
+
+        comboBox.setForeground(
+                Theme.TEXT
+        );
+
+        comboBox.setBackground(
+                Theme.WHITE
+        );
+
+        comboBox.setBorder(
+                BorderFactory.createLineBorder(
+                        Theme.STONE_BROWN
+                )
+        );
+    }
+
+
+    // =========================================================
     // SEARCH HELPER
     // =========================================================
 
@@ -2797,3 +2767,4 @@ public class EmergencyManagementPanel extends JPanel {
                 .trim();
     }
 }
+

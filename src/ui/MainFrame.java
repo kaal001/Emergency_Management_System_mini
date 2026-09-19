@@ -8,6 +8,8 @@ import persistence.FileManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class MainFrame extends JFrame {
 
@@ -27,7 +29,6 @@ public class MainFrame extends JFrame {
 
     // =========================================================
     // SHARED MANAGERS
-    // The same manager objects are shared across all panels.
     // =========================================================
 
     private final EmergencyManager emergencyManager;
@@ -54,7 +55,6 @@ public class MainFrame extends JFrame {
 
     private ManagementTabbedPanel managementPanel;
 
-    // ADDED: History and Reports panels
     private EmergencyHistoryPanel historyPanel;
 
     private ReportPanel reportPanel;
@@ -71,6 +71,19 @@ public class MainFrame extends JFrame {
     private JButton historyButton;
 
     private JButton reportsButton;
+
+
+    // =========================================================
+    // HEADER COMPONENTS
+    // =========================================================
+
+    private JLabel currentPageLabel;
+
+    private JLabel systemStatusDot;
+
+    private JButton refreshButton;
+
+    private Timer statusPulseTimer;
 
 
     // =========================================================
@@ -109,30 +122,18 @@ public class MainFrame extends JFrame {
         this.loggedInAdmin =
                 loggedInAdmin;
 
-
-        // -----------------------------------------------------
-        // CREATE ONE SHARED FILE MANAGER
-        // -----------------------------------------------------
-
         this.fileManager =
                 new FileManager();
-
-
-        // -----------------------------------------------------
-        // CREATE MANAGERS USING THE SAME FILE MANAGER
-        // -----------------------------------------------------
 
         this.emergencyManager =
                 new EmergencyManager(
                         fileManager
                 );
 
-
         this.teamManager =
                 new TeamManager(
                         fileManager
                 );
-
 
         this.assignmentManager =
                 new AssignmentManager(
@@ -141,10 +142,11 @@ public class MainFrame extends JFrame {
                         fileManager
                 );
 
-
         initializeFrame();
 
         buildUI();
+
+        startSystemPulse();
     }
 
 
@@ -158,12 +160,10 @@ public class MainFrame extends JFrame {
                 Theme.APP_TITLE
         );
 
-
         setSize(
                 1280,
                 760
         );
-
 
         setMinimumSize(
                 new Dimension(
@@ -172,28 +172,24 @@ public class MainFrame extends JFrame {
                 )
         );
 
-
         setResizable(
                 true
         );
-
 
         setDefaultCloseOperation(
                 JFrame.DO_NOTHING_ON_CLOSE
         );
 
-
         setLocationRelativeTo(
                 null
         );
 
-
         addWindowListener(
-                new java.awt.event.WindowAdapter() {
+                new WindowAdapter() {
 
                     @Override
                     public void windowClosing(
-                            java.awt.event.WindowEvent e
+                            WindowEvent e
                     ) {
 
                         confirmExit();
@@ -204,7 +200,7 @@ public class MainFrame extends JFrame {
 
 
     // =========================================================
-    // BUILD UI
+    // BUILD COMPLETE UI
     // =========================================================
 
     private void buildUI() {
@@ -215,7 +211,7 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // LEFT SIDEBAR
+        // SIDEBAR
         // =====================================================
 
         JPanel sidebar =
@@ -223,7 +219,7 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // RIGHT SIDE CENTER AREA
+        // MAIN CENTER AREA
         // =====================================================
 
         JPanel centerArea =
@@ -231,15 +227,14 @@ public class MainFrame extends JFrame {
                         new BorderLayout()
                 );
 
-
         centerArea.setBackground(
                 Theme.BACKGROUND
         );
 
 
-        // -----------------------------------------------------
-        // TOP HEADER
-        // -----------------------------------------------------
+        // =====================================================
+        // HEADER
+        // =====================================================
 
         centerArea.add(
                 createHeader(),
@@ -254,12 +249,10 @@ public class MainFrame extends JFrame {
         cardLayout =
                 new CardLayout();
 
-
         contentPanel =
                 new JPanel(
                         cardLayout
                 );
-
 
         contentPanel.setBackground(
                 Theme.BACKGROUND
@@ -267,7 +260,7 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // DASHBOARD PANEL
+        // DASHBOARD
         // =====================================================
 
         dashboardPanel =
@@ -278,7 +271,7 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // MANAGEMENT PANEL
+        // MANAGEMENT
         // =====================================================
 
         managementPanel =
@@ -290,8 +283,7 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // HISTORY PANEL
-        // ADDED
+        // HISTORY
         // =====================================================
 
         historyPanel =
@@ -301,8 +293,7 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // REPORTS PANEL
-        // ADDED
+        // REPORTS
         // =====================================================
 
         reportPanel =
@@ -313,7 +304,7 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // ADD ACTUAL PAGES
+        // REGISTER PAGES
         // =====================================================
 
         contentPanel.add(
@@ -321,21 +312,16 @@ public class MainFrame extends JFrame {
                 DASHBOARD_PAGE
         );
 
-
         contentPanel.add(
                 managementPanel,
                 MANAGEMENT_PAGE
         );
 
-
-        // ADDED: Real History page
         contentPanel.add(
                 historyPanel,
                 HISTORY_PAGE
         );
 
-
-        // ADDED: Real Reports page
         contentPanel.add(
                 reportPanel,
                 REPORTS_PAGE
@@ -349,19 +335,17 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // MAIN FRAME LAYOUT
+        // FINAL FRAME LAYOUT
         // =====================================================
 
         setLayout(
                 new BorderLayout()
         );
 
-
         add(
                 sidebar,
                 BorderLayout.WEST
         );
-
 
         add(
                 centerArea,
@@ -381,11 +365,9 @@ public class MainFrame extends JFrame {
                         new BorderLayout()
                 );
 
-
         header.setBackground(
                 Theme.HEADER
         );
-
 
         header.setPreferredSize(
                 new Dimension(
@@ -394,75 +376,172 @@ public class MainFrame extends JFrame {
                 )
         );
 
+        header.setBorder(
+                BorderFactory.createEmptyBorder(
+                        8,
+                        24,
+                        8,
+                        20
+                )
+        );
+
 
         // =====================================================
-        // APPLICATION TITLE
+        // LEFT TITLE AREA
         // =====================================================
+
+        JPanel titlePanel =
+                new JPanel();
+
+        titlePanel.setLayout(
+                new BoxLayout(
+                        titlePanel,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        titlePanel.setOpaque(
+                false
+        );
+
 
         JLabel applicationTitle =
                 new JLabel(
                         "EMERGENCY MANAGEMENT SYSTEM"
                 );
 
-
         applicationTitle.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        25
-                )
+                Theme.TITLE_FONT
         );
-
 
         applicationTitle.setForeground(
                 Theme.LIGHT_TEXT
         );
 
 
-        applicationTitle.setBorder(
-                BorderFactory.createEmptyBorder(
-                        0,
-                        28,
-                        0,
-                        10
+        currentPageLabel =
+                new JLabel(
+                        "DASHBOARD"
+                );
+
+        currentPageLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        currentPageLabel.setForeground(
+                Theme.ACCENT
+        );
+
+
+        titlePanel.add(
+                applicationTitle
+        );
+
+        titlePanel.add(
+                Box.createVerticalStrut(
+                        2
                 )
+        );
+
+        titlePanel.add(
+                currentPageLabel
         );
 
 
         // =====================================================
-        // RIGHT HEADER
+        // RIGHT HEADER AREA
         // =====================================================
 
         JPanel rightHeader =
                 new JPanel(
                         new FlowLayout(
                                 FlowLayout.RIGHT,
-                                14,
-                                13
+                                10,
+                                10
                         )
                 );
 
-
-        rightHeader.setBackground(
-                Theme.HEADER
+        rightHeader.setOpaque(
+                false
         );
 
 
-        JButton refreshButton =
-                new JButton(
-                        "REFRESH"
+        // SYSTEM STATUS
+
+        JPanel systemStatusPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.CENTER,
+                                5,
+                                0
+                        )
                 );
 
+        systemStatusPanel.setOpaque(
+                true
+        );
 
-        Theme.styleHeaderButton(
-                refreshButton
+        systemStatusPanel.setBackground(
+                new Color(
+                        Theme.STONE_BROWN.getRed(),
+                        Theme.STONE_BROWN.getGreen(),
+                        Theme.STONE_BROWN.getBlue(),
+                        80
+                )
+        );
+
+        systemStatusPanel.setBorder(
+                Theme.createRoundedBorder(
+                        Theme.STONE_BROWN,
+                        14,
+                        1,
+                        5
+                )
         );
 
 
-        refreshButton.addActionListener(
-                e -> refreshCurrentPage()
+        systemStatusDot =
+                new JLabel(
+                        "●"
+                );
+
+        systemStatusDot.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
         );
 
+        systemStatusDot.setForeground(
+                Theme.ACCENT
+        );
+
+
+        JLabel systemStatusLabel =
+                new JLabel(
+                        "SYSTEM ONLINE"
+                );
+
+        systemStatusLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        systemStatusLabel.setForeground(
+                Theme.LIGHT_TEXT
+        );
+
+
+        systemStatusPanel.add(
+                systemStatusDot
+        );
+
+        systemStatusPanel.add(
+                systemStatusLabel
+        );
+
+
+        // ADMIN
 
         JLabel adminLabel =
                 new JLabel(
@@ -470,32 +549,53 @@ public class MainFrame extends JFrame {
                                 + loggedInAdmin.getName()
                 );
 
-
         adminLabel.setFont(
                 Theme.NORMAL_FONT
         );
-
 
         adminLabel.setForeground(
                 Theme.ACCENT
         );
 
 
-        rightHeader.add(
+        // REFRESH BUTTON
+
+        refreshButton =
+                new JButton(
+                        "REFRESH"
+                );
+
+        Theme.styleHeaderButton(
                 refreshButton
         );
 
+        refreshButton.addActionListener(
+                e -> {
+
+                    refreshCurrentPage();
+
+                    animateRefreshButton();
+                }
+        );
+
+
+        rightHeader.add(
+                systemStatusPanel
+        );
 
         rightHeader.add(
                 adminLabel
         );
 
-
-        header.add(
-                applicationTitle,
-                BorderLayout.WEST
+        rightHeader.add(
+                refreshButton
         );
 
+
+        header.add(
+                titlePanel,
+                BorderLayout.WEST
+        );
 
         header.add(
                 rightHeader,
@@ -508,6 +608,77 @@ public class MainFrame extends JFrame {
 
 
     // =========================================================
+    // SYSTEM STATUS PULSE
+    // =========================================================
+
+    private void startSystemPulse() {
+
+        statusPulseTimer =
+                new Timer(
+                        850,
+                        e -> {
+
+                            if (
+                                    systemStatusDot
+                                            .getForeground()
+                                            .equals(
+                                                    Theme.ACCENT
+                                            )
+                            ) {
+
+                                systemStatusDot.setForeground(
+                                        Theme.KHAKI_BEIGE
+                                                .brighter()
+                                );
+
+                            } else {
+
+                                systemStatusDot.setForeground(
+                                        Theme.ACCENT
+                                );
+                            }
+                        }
+                );
+
+        statusPulseTimer.start();
+    }
+
+
+    // =========================================================
+    // REFRESH BUTTON FEEDBACK
+    // =========================================================
+
+    private void animateRefreshButton() {
+
+        if (refreshButton == null) {
+            return;
+        }
+
+        String originalText =
+                "REFRESH";
+
+        refreshButton.setText(
+                "REFRESHED"
+        );
+
+        Timer timer =
+                new Timer(
+                        900,
+                        e ->
+                                refreshButton.setText(
+                                        originalText
+                                )
+                );
+
+        timer.setRepeats(
+                false
+        );
+
+        timer.start();
+    }
+
+
+    // =========================================================
     // SIDEBAR
     // =========================================================
 
@@ -516,7 +687,6 @@ public class MainFrame extends JFrame {
         JPanel sidebar =
                 new JPanel();
 
-
         sidebar.setLayout(
                 new BoxLayout(
                         sidebar,
@@ -524,11 +694,9 @@ public class MainFrame extends JFrame {
                 )
         );
 
-
         sidebar.setBackground(
                 Theme.SIDEBAR
         );
-
 
         sidebar.setPreferredSize(
                 new Dimension(
@@ -537,45 +705,97 @@ public class MainFrame extends JFrame {
                 )
         );
 
-
         sidebar.setBorder(
                 BorderFactory.createEmptyBorder(
-                        25,
-                        12,
+                        24,
+                        14,
                         18,
-                        12
+                        14
                 )
         );
 
 
         // =====================================================
-        // ADMIN MENU TITLE
+        // BRAND
+        // =====================================================
+
+        JLabel brandLabel =
+                new JLabel(
+                        "EMS"
+                );
+
+        brandLabel.setFont(
+                Theme.SUBTITLE_FONT
+        );
+
+        brandLabel.setForeground(
+                Theme.ACCENT
+        );
+
+        brandLabel.setAlignmentX(
+                Component.CENTER_ALIGNMENT
+        );
+
+        sidebar.add(
+                brandLabel
+        );
+
+
+        JLabel versionLabel =
+                new JLabel(
+                        Theme.APP_VERSION
+                );
+
+        versionLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        versionLabel.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+        versionLabel.setAlignmentX(
+                Component.CENTER_ALIGNMENT
+        );
+
+        sidebar.add(
+                Box.createVerticalStrut(
+                        3
+                )
+        );
+
+        sidebar.add(
+                versionLabel
+        );
+
+
+        sidebar.add(
+                Box.createVerticalStrut(
+                        26
+                )
+        );
+
+
+        // =====================================================
+        // NAVIGATION TITLE
         // =====================================================
 
         JLabel menuTitle =
                 new JLabel(
-                        "ADMIN MENU"
+                        "ADMIN NAVIGATION"
                 );
 
-
         menuTitle.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        16
-                )
+                Theme.SMALL_FONT
         );
-
 
         menuTitle.setForeground(
-                Theme.ACCENT
+                Theme.MUTED_TEXT
         );
-
 
         menuTitle.setAlignmentX(
                 Component.CENTER_ALIGNMENT
         );
-
 
         sidebar.add(
                 menuTitle
@@ -584,7 +804,7 @@ public class MainFrame extends JFrame {
 
         sidebar.add(
                 Box.createVerticalStrut(
-                        22
+                        14
                 )
         );
 
@@ -598,18 +818,15 @@ public class MainFrame extends JFrame {
                         "DASHBOARD"
                 );
 
-
         managementButton =
                 createAdminButton(
                         "MANAGEMENT"
                 );
 
-
         historyButton =
                 createAdminButton(
                         "HISTORY"
                 );
-
 
         reportsButton =
                 createAdminButton(
@@ -617,90 +834,66 @@ public class MainFrame extends JFrame {
                 );
 
 
-        // -----------------------------------------------------
-        // Dashboard
-        // -----------------------------------------------------
-
         dashboardButton.addActionListener(
-                e -> showPage(
-                        DASHBOARD_PAGE,
-                        dashboardButton
-                )
+                e ->
+                        showPage(
+                                DASHBOARD_PAGE,
+                                dashboardButton
+                        )
         );
-
-
-        // -----------------------------------------------------
-        // Management
-        // -----------------------------------------------------
 
         managementButton.addActionListener(
-                e -> showPage(
-                        MANAGEMENT_PAGE,
-                        managementButton
-                )
+                e ->
+                        showPage(
+                                MANAGEMENT_PAGE,
+                                managementButton
+                        )
         );
-
-
-        // -----------------------------------------------------
-        // History
-        // -----------------------------------------------------
 
         historyButton.addActionListener(
-                e -> showPage(
-                        HISTORY_PAGE,
-                        historyButton
-                )
+                e ->
+                        showPage(
+                                HISTORY_PAGE,
+                                historyButton
+                        )
         );
-
-
-        // -----------------------------------------------------
-        // Reports
-        // -----------------------------------------------------
 
         reportsButton.addActionListener(
-                e -> showPage(
-                        REPORTS_PAGE,
-                        reportsButton
-                )
+                e ->
+                        showPage(
+                                REPORTS_PAGE,
+                                reportsButton
+                        )
         );
 
-
-        // =====================================================
-        // ADD NAVIGATION BUTTONS
-        // =====================================================
 
         sidebar.add(
                 dashboardButton
         );
 
-
         sidebar.add(
                 Box.createVerticalStrut(
-                        12
+                        10
                 )
         );
-
 
         sidebar.add(
                 managementButton
         );
 
-
         sidebar.add(
                 Box.createVerticalStrut(
-                        12
+                        10
                 )
         );
-
 
         sidebar.add(
                 historyButton
         );
 
-
         sidebar.add(
                 Box.createVerticalStrut(
-                        12
+                        10
                 )
         );
 
@@ -710,12 +903,115 @@ public class MainFrame extends JFrame {
 
 
         // =====================================================
-        // FLEXIBLE EMPTY SPACE
-        // Pushes Logout to the bottom.
+        // SPACER
         // =====================================================
 
         sidebar.add(
                 Box.createVerticalGlue()
+        );
+
+
+        // =====================================================
+        // QUICK SYSTEM INFO
+        // =====================================================
+
+        JPanel infoPanel =
+                new JPanel();
+
+        infoPanel.setLayout(
+                new BoxLayout(
+                        infoPanel,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        infoPanel.setOpaque(
+                true
+        );
+
+        infoPanel.setBackground(
+                new Color(
+                        Theme.BLACK.getRed(),
+                        Theme.BLACK.getGreen(),
+                        Theme.BLACK.getBlue(),
+                        80
+                )
+        );
+
+        infoPanel.setBorder(
+                Theme.createRoundedBorder(
+                        Theme.STONE_BROWN,
+                        14,
+                        1,
+                        8
+                )
+        );
+
+        infoPanel.setAlignmentX(
+                Component.CENTER_ALIGNMENT
+        );
+
+
+        JLabel modeLabel =
+                new JLabel(
+                        "ADMIN MODE"
+                );
+
+        modeLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        modeLabel.setForeground(
+                Theme.ACCENT
+        );
+
+        modeLabel.setAlignmentX(
+                Component.CENTER_ALIGNMENT
+        );
+
+
+        JLabel storageLabel =
+                new JLabel(
+                        "LOCAL SERIALIZATION"
+                );
+
+        storageLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        storageLabel.setForeground(
+                Theme.LIGHT_TEXT
+        );
+
+        storageLabel.setAlignmentX(
+                Component.CENTER_ALIGNMENT
+        );
+
+
+        infoPanel.add(
+                modeLabel
+        );
+
+        infoPanel.add(
+                Box.createVerticalStrut(
+                        3
+                )
+        );
+
+        infoPanel.add(
+                storageLabel
+        );
+
+
+        sidebar.add(
+                infoPanel
+        );
+
+
+        sidebar.add(
+                Box.createVerticalStrut(
+                        12
+                )
         );
 
 
@@ -728,28 +1024,26 @@ public class MainFrame extends JFrame {
                         "LOGOUT"
                 );
 
-
         Theme.styleLogoutButton(
                 logoutButton
         );
-
 
         logoutButton.setAlignmentX(
                 Component.CENTER_ALIGNMENT
         );
 
-
         logoutButton.addActionListener(
                 e -> logout()
         );
-
 
         sidebar.add(
                 logoutButton
         );
 
 
-        // Dashboard active initially
+        // =====================================================
+        // INITIAL ACTIVE PAGE
+        // =====================================================
 
         setActiveButton(
                 dashboardButton
@@ -773,16 +1067,13 @@ public class MainFrame extends JFrame {
                         text
                 );
 
-
         Theme.styleAdminMenuButton(
                 button
         );
 
-
         button.setAlignmentX(
                 Component.CENTER_ALIGNMENT
         );
-
 
         return button;
     }
@@ -800,11 +1091,13 @@ public class MainFrame extends JFrame {
         currentPage =
                 pageName;
 
-
         setActiveButton(
                 selectedButton
         );
 
+        updatePageIndicator(
+                pageName
+        );
 
         cardLayout.show(
                 contentPanel,
@@ -812,9 +1105,9 @@ public class MainFrame extends JFrame {
         );
 
 
-        // -----------------------------------------------------
-        // Refresh the selected module when opened
-        // -----------------------------------------------------
+        // =====================================================
+        // REFRESH SELECTED MODULE
+        // =====================================================
 
         if (
                 DASHBOARD_PAGE.equals(
@@ -838,7 +1131,6 @@ public class MainFrame extends JFrame {
                 )
         ) {
 
-            // ADDED
             historyPanel.loadHistory();
 
         } else if (
@@ -847,9 +1139,70 @@ public class MainFrame extends JFrame {
                 )
         ) {
 
-            // ADDED
             reportPanel.refreshReports();
         }
+
+
+        contentPanel.revalidate();
+
+        contentPanel.repaint();
+    }
+
+
+    // =========================================================
+    // PAGE INDICATOR
+    // =========================================================
+
+    private void updatePageIndicator(
+            String pageName
+    ) {
+
+        if (currentPageLabel == null) {
+            return;
+        }
+
+        String text;
+
+        if (
+                DASHBOARD_PAGE.equals(
+                        pageName
+                )
+        ) {
+
+            text =
+                    "DASHBOARD";
+
+        } else if (
+                MANAGEMENT_PAGE.equals(
+                        pageName
+                )
+        ) {
+
+            text =
+                    "MANAGEMENT";
+
+        } else if (
+                HISTORY_PAGE.equals(
+                        pageName
+                )
+        ) {
+
+            text =
+                    "HISTORY";
+
+        } else {
+
+            text =
+                    "REPORTS";
+        }
+
+        currentPageLabel.setText(
+                text
+        );
+
+        currentPageLabel.setForeground(
+                Theme.ACCENT
+        );
     }
 
 
@@ -861,39 +1214,25 @@ public class MainFrame extends JFrame {
             JButton selectedButton
     ) {
 
-        Theme.styleAdminMenuButton(
-                dashboardButton
+        Theme.setActiveMenuButton(
+                dashboardButton,
+                selectedButton == dashboardButton
         );
 
-
-        Theme.styleAdminMenuButton(
-                managementButton
+        Theme.setActiveMenuButton(
+                managementButton,
+                selectedButton == managementButton
         );
 
-
-        Theme.styleAdminMenuButton(
-                historyButton
+        Theme.setActiveMenuButton(
+                historyButton,
+                selectedButton == historyButton
         );
 
-
-        Theme.styleAdminMenuButton(
-                reportsButton
+        Theme.setActiveMenuButton(
+                reportsButton,
+                selectedButton == reportsButton
         );
-
-
-        if (
-                selectedButton != null
-        ) {
-
-            selectedButton.setBackground(
-                    Theme.STONE_BROWN
-            );
-
-
-            selectedButton.setForeground(
-                    Theme.LIGHT_TEXT
-            );
-        }
     }
 
 
@@ -910,197 +1249,36 @@ public class MainFrame extends JFrame {
         ) {
 
             dashboardPanel.refreshDashboard();
-        }
 
-
-        else if (
+        } else if (
                 MANAGEMENT_PAGE.equals(
                         currentPage
                 )
         ) {
 
             managementPanel.refreshAllTabs();
-        }
 
-
-        else if (
+        } else if (
                 HISTORY_PAGE.equals(
                         currentPage
                 )
         ) {
 
-            // ADDED
             historyPanel.loadHistory();
-        }
 
-
-        else if (
+        } else if (
                 REPORTS_PAGE.equals(
                         currentPage
                 )
         ) {
 
-            // ADDED
             reportPanel.refreshReports();
         }
-
 
         contentPanel.revalidate();
 
         contentPanel.repaint();
     }
-
-
-    // =========================================================
-    // HISTORY PLACEHOLDER
-    // =========================================================
-
-    /*
-    private JPanel createHistoryPlaceholder() {
-
-        return createSimplePlaceholder(
-                "EMERGENCY HISTORY",
-                "Emergency history module will be added next."
-        );
-    }
-    */
-
-
-    // =========================================================
-    // REPORTS PLACEHOLDER
-    // =========================================================
-
-    /*
-    private JPanel createReportsPlaceholder() {
-
-        return createSimplePlaceholder(
-                "REPORTS & STATISTICS",
-                "Reports and statistics module will be added next."
-        );
-    }
-    */
-
-
-    // =========================================================
-    // SIMPLE PLACEHOLDER
-    // =========================================================
-
-    /*
-    private JPanel createSimplePlaceholder(
-            String title,
-            String description
-    ) {
-
-        JPanel page =
-                new JPanel(
-                        new GridBagLayout()
-                );
-
-
-        page.setBackground(
-                Theme.BACKGROUND
-        );
-
-
-        JPanel box =
-                new JPanel();
-
-
-        box.setLayout(
-                new BoxLayout(
-                        box,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-
-        box.setBackground(
-                Theme.ALMOND_CREAM
-        );
-
-
-        box.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                Theme.KHAKI_BEIGE
-                        ),
-                        BorderFactory.createEmptyBorder(
-                                30,
-                                45,
-                                30,
-                                45
-                        )
-                )
-        );
-
-
-        JLabel titleLabel =
-                new JLabel(
-                        title
-                );
-
-
-        titleLabel.setFont(
-                Theme.PAGE_TITLE_FONT
-        );
-
-
-        titleLabel.setForeground(
-                Theme.TEXT
-        );
-
-
-        titleLabel.setAlignmentX(
-                Component.CENTER_ALIGNMENT
-        );
-
-
-        JLabel descriptionLabel =
-                new JLabel(
-                        description
-                );
-
-
-        descriptionLabel.setFont(
-                Theme.NORMAL_FONT
-        );
-
-
-        descriptionLabel.setForeground(
-                Theme.MUTED_TEXT
-        );
-
-
-        descriptionLabel.setAlignmentX(
-                Component.CENTER_ALIGNMENT
-        );
-
-
-        box.add(
-                titleLabel
-        );
-
-
-        box.add(
-                Box.createVerticalStrut(
-                        8
-                )
-        );
-
-
-        box.add(
-                descriptionLabel
-        );
-
-
-        page.add(
-                box
-        );
-
-
-        return page;
-    }
-    */
 
 
     // =========================================================
@@ -1117,22 +1295,26 @@ public class MainFrame extends JFrame {
                         JOptionPane.YES_NO_OPTION
                 );
 
-
         if (
                 result
                         == JOptionPane.YES_OPTION
         ) {
+
+            if (
+                    statusPulseTimer != null
+            ) {
+
+                statusPulseTimer.stop();
+            }
 
             LoginFrame loginFrame =
                     new LoginFrame(
                             new manager.AuthenticationManager()
                     );
 
-
             loginFrame.setVisible(
                     true
             );
-
 
             dispose();
         }
@@ -1153,13 +1335,21 @@ public class MainFrame extends JFrame {
                         JOptionPane.YES_NO_OPTION
                 );
 
-
         if (
                 result
                         == JOptionPane.YES_OPTION
         ) {
 
-            System.exit(0);
+            if (
+                    statusPulseTimer != null
+            ) {
+
+                statusPulseTimer.stop();
+            }
+
+            System.exit(
+                    0
+            );
         }
     }
 
@@ -1173,6 +1363,19 @@ public class MainFrame extends JFrame {
         JMenuBar menuBar =
                 new JMenuBar();
 
+        menuBar.setBackground(
+                Theme.HEADER
+        );
+
+        menuBar.setBorder(
+                BorderFactory.createEmptyBorder(
+                        3,
+                        8,
+                        3,
+                        8
+                )
+        );
+
 
         // =====================================================
         // FILE
@@ -1183,36 +1386,29 @@ public class MainFrame extends JFrame {
                         "File"
                 );
 
-
         JMenuItem logoutItem =
                 new JMenuItem(
                         "Logout"
                 );
-
 
         JMenuItem exitItem =
                 new JMenuItem(
                         "Exit"
                 );
 
-
         logoutItem.addActionListener(
                 e -> logout()
         );
-
 
         exitItem.addActionListener(
                 e -> confirmExit()
         );
 
-
         fileMenu.add(
                 logoutItem
         );
 
-
         fileMenu.addSeparator();
-
 
         fileMenu.add(
                 exitItem
@@ -1228,23 +1424,74 @@ public class MainFrame extends JFrame {
                         "View"
                 );
 
-
         JMenuItem dashboardItem =
                 new JMenuItem(
                         "Dashboard"
                 );
 
+        JMenuItem managementItem =
+                new JMenuItem(
+                        "Management"
+                );
+
+        JMenuItem historyItem =
+                new JMenuItem(
+                        "History"
+                );
+
+        JMenuItem reportsItem =
+                new JMenuItem(
+                        "Reports"
+                );
+
 
         dashboardItem.addActionListener(
-                e -> showPage(
-                        DASHBOARD_PAGE,
-                        dashboardButton
-                )
+                e ->
+                        showPage(
+                                DASHBOARD_PAGE,
+                                dashboardButton
+                        )
+        );
+
+        managementItem.addActionListener(
+                e ->
+                        showPage(
+                                MANAGEMENT_PAGE,
+                                managementButton
+                        )
+        );
+
+        historyItem.addActionListener(
+                e ->
+                        showPage(
+                                HISTORY_PAGE,
+                                historyButton
+                        )
+        );
+
+        reportsItem.addActionListener(
+                e ->
+                        showPage(
+                                REPORTS_PAGE,
+                                reportsButton
+                        )
         );
 
 
         viewMenu.add(
                 dashboardItem
+        );
+
+        viewMenu.add(
+                managementItem
+        );
+
+        viewMenu.add(
+                historyItem
+        );
+
+        viewMenu.add(
+                reportsItem
         );
 
 
@@ -1257,17 +1504,14 @@ public class MainFrame extends JFrame {
                         "Help"
                 );
 
-
         JMenuItem aboutItem =
                 new JMenuItem(
                         "About"
                 );
 
-
         aboutItem.addActionListener(
                 e -> showAboutDialog()
         );
-
 
         helpMenu.add(
                 aboutItem
@@ -1282,11 +1526,9 @@ public class MainFrame extends JFrame {
                 fileMenu
         );
 
-
         menuBar.add(
                 viewMenu
         );
-
 
         menuBar.add(
                 helpMenu

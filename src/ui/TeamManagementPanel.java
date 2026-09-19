@@ -75,7 +75,7 @@ public class TeamManagementPanel extends JPanel {
         setLayout(
                 new BorderLayout(
                         0,
-                        15
+                        12
                 )
         );
 
@@ -85,19 +85,17 @@ public class TeamManagementPanel extends JPanel {
 
         setBorder(
                 BorderFactory.createEmptyBorder(
-                        20,
-                        22,
-                        20,
-                        22
+                        14,
+                        18,
+                        12,
+                        18
                 )
         );
-
 
         add(
                 createPageHeader(),
                 BorderLayout.NORTH
         );
-
 
         JSplitPane splitPane =
                 new JSplitPane(
@@ -106,12 +104,16 @@ public class TeamManagementPanel extends JPanel {
                         createTablePanel()
                 );
 
-        splitPane.setDividerLocation(
-                360
+        splitPane.setResizeWeight(
+                0.42
         );
 
-        splitPane.setResizeWeight(
-                0.30
+        splitPane.setDividerLocation(
+                340
+        );
+
+        splitPane.setDividerSize(
+                6
         );
 
         splitPane.setContinuousLayout(
@@ -119,22 +121,30 @@ public class TeamManagementPanel extends JPanel {
         );
 
         splitPane.setBorder(
-                null
+                BorderFactory.createEmptyBorder()
         );
 
+        // Both sides must be allowed to shrink with the window.
+        splitPane.getLeftComponent()
+                .setMinimumSize(
+                        new Dimension(0, 0)
+                );
+
+        splitPane.getRightComponent()
+                .setMinimumSize(
+                        new Dimension(0, 0)
+                );
 
         add(
                 splitPane,
                 BorderLayout.CENTER
         );
 
-
         add(
                 createActionBar(),
                 BorderLayout.SOUTH
         );
     }
-
 
     // =========================================================
     // PAGE HEADER
@@ -147,10 +157,7 @@ public class TeamManagementPanel extends JPanel {
                         new BorderLayout()
                 );
 
-        panel.setBackground(
-                Theme.BACKGROUND
-        );
-
+        panel.setOpaque(false);
 
         JPanel titlePanel =
                 new JPanel();
@@ -162,10 +169,20 @@ public class TeamManagementPanel extends JPanel {
                 )
         );
 
-        titlePanel.setBackground(
-                Theme.BACKGROUND
+        titlePanel.setOpaque(false);
+
+        JLabel eyebrow =
+                new JLabel(
+                        "CONTROL MODULE"
+                );
+
+        eyebrow.setFont(
+                Theme.SMALL_FONT
         );
 
+        eyebrow.setForeground(
+                Theme.STONE_BROWN
+        );
 
         JLabel title =
                 new JLabel(
@@ -173,13 +190,16 @@ public class TeamManagementPanel extends JPanel {
                 );
 
         title.setFont(
-                Theme.PAGE_TITLE_FONT
+                new Font(
+                        Theme.PAGE_TITLE_FONT.getFamily(),
+                        Font.BOLD,
+                        21
+                )
         );
 
         title.setForeground(
                 Theme.TEXT
         );
-
 
         JLabel subtitle =
                 new JLabel(
@@ -194,25 +214,34 @@ public class TeamManagementPanel extends JPanel {
                 Theme.MUTED_TEXT
         );
 
+        titlePanel.add(
+                eyebrow
+        );
+
+        titlePanel.add(
+                Box.createVerticalStrut(
+                        2
+                )
+        );
 
         titlePanel.add(
                 title
         );
 
         titlePanel.add(
-                Box.createVerticalStrut(4)
+                Box.createVerticalStrut(
+                        3
+                )
         );
 
         titlePanel.add(
                 subtitle
         );
 
-
         panel.add(
                 titlePanel,
                 BorderLayout.WEST
         );
-
 
         return panel;
     }
@@ -226,27 +255,36 @@ public class TeamManagementPanel extends JPanel {
 
         JPanel outerPanel =
                 new JPanel(
-                        new BorderLayout()
+                        new BorderLayout(
+                                0,
+                                10
+                        )
                 );
 
         outerPanel.setBackground(
                 Theme.ALMOND_CREAM
         );
 
+        outerPanel.setMinimumSize(
+                new Dimension(0, 0)
+        );
+
         outerPanel.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                Theme.KHAKI_BEIGE
+                        Theme.createRoundedBorder(
+                                Theme.KHAKI_BEIGE,
+                                14,
+                                1,
+                                1
                         ),
                         BorderFactory.createEmptyBorder(
+                                14,
                                 16,
-                                16,
-                                16,
+                                12,
                                 16
                         )
                 )
         );
-
 
         JLabel formTitle =
                 new JLabel(
@@ -261,13 +299,6 @@ public class TeamManagementPanel extends JPanel {
                 Theme.TEXT
         );
 
-
-        outerPanel.add(
-                formTitle,
-                BorderLayout.NORTH
-        );
-
-
         JPanel form =
                 new JPanel(
                         new GridBagLayout()
@@ -277,107 +308,40 @@ public class TeamManagementPanel extends JPanel {
                 Theme.ALMOND_CREAM
         );
 
-
         GridBagConstraints gbc =
                 new GridBagConstraints();
 
         gbc.insets =
                 new Insets(
-                        8,
-                        5,
-                        8,
-                        5
+                        6,
+                        4,
+                        6,
+                        4
                 );
+
+        gbc.anchor =
+                GridBagConstraints.WEST;
 
         gbc.fill =
                 GridBagConstraints.HORIZONTAL;
 
-
-        // =====================================================
-        // TEAM ID
-        // =====================================================
-
         teamIdField =
                 new JTextField();
-
-        styleTextField(
-                teamIdField
-        );
-
-        addFormRow(
-                form,
-                gbc,
-                0,
-                "Team ID",
-                teamIdField
-        );
-
-
-        // =====================================================
-        // TEAM NAME
-        // =====================================================
+        styleTextField(teamIdField);
 
         teamNameField =
                 new JTextField();
-
-        styleTextField(
-                teamNameField
-        );
-
-        addFormRow(
-                form,
-                gbc,
-                1,
-                "Team Name",
-                teamNameField
-        );
-
-
-        // =====================================================
-        // TEAM TYPE
-        // =====================================================
+        styleTextField(teamNameField);
 
         teamTypeComboBox =
                 new JComboBox<>(
                         TeamType.values()
                 );
-
-        styleComboBox(
-                teamTypeComboBox
-        );
-
-        addFormRow(
-                form,
-                gbc,
-                2,
-                "Team Type",
-                teamTypeComboBox
-        );
-
-
-        // =====================================================
-        // CONTACT NUMBER
-        // =====================================================
+        styleComboBox(teamTypeComboBox);
 
         contactNumberField =
                 new JTextField();
-
-        styleTextField(
-                contactNumberField
-        );
-
-        addFormRow(
-                form,
-                gbc,
-                3,
-                "Contact Number",
-                contactNumberField
-        );
-
-
-        // =====================================================
-        // MEMBER COUNT
-        // =====================================================
+        styleTextField(contactNumberField);
 
         memberCountSpinner =
                 new JSpinner(
@@ -388,9 +352,55 @@ public class TeamManagementPanel extends JPanel {
                                 1
                         )
                 );
-
         memberCountSpinner.setFont(
                 Theme.NORMAL_FONT
+        );
+
+        availableCheckBox =
+                new JCheckBox(
+                        "Available"
+                );
+        availableCheckBox.setFont(
+                Theme.NORMAL_FONT
+        );
+        availableCheckBox.setForeground(
+                Theme.TEXT
+        );
+        availableCheckBox.setBackground(
+                Theme.ALMOND_CREAM
+        );
+        availableCheckBox.setSelected(true);
+
+        addFormRow(
+                form,
+                gbc,
+                0,
+                "Team ID",
+                teamIdField
+        );
+
+        addFormRow(
+                form,
+                gbc,
+                1,
+                "Team Name",
+                teamNameField
+        );
+
+        addFormRow(
+                form,
+                gbc,
+                2,
+                "Team Type",
+                teamTypeComboBox
+        );
+
+        addFormRow(
+                form,
+                gbc,
+                3,
+                "Contact Number",
+                contactNumberField
         );
 
         addFormRow(
@@ -401,33 +411,6 @@ public class TeamManagementPanel extends JPanel {
                 memberCountSpinner
         );
 
-
-        // =====================================================
-        // AVAILABILITY
-        // =====================================================
-
-        availableCheckBox =
-                new JCheckBox(
-                        "Available"
-                );
-
-        availableCheckBox.setFont(
-                Theme.NORMAL_FONT
-        );
-
-        availableCheckBox.setForeground(
-                Theme.TEXT
-        );
-
-        availableCheckBox.setBackground(
-                Theme.ALMOND_CREAM
-        );
-
-        availableCheckBox.setSelected(
-                true
-        );
-
-
         addFormRow(
                 form,
                 gbc,
@@ -436,16 +419,97 @@ public class TeamManagementPanel extends JPanel {
                 availableCheckBox
         );
 
+        JPanel info =
+                new JPanel(
+                        new BorderLayout()
+                );
 
-        outerPanel.add(
-                form,
+        info.setBackground(
+                new Color(
+                        Theme.KHAKI_BEIGE.getRed(),
+                        Theme.KHAKI_BEIGE.getGreen(),
+                        Theme.KHAKI_BEIGE.getBlue(),
+                        55
+                )
+        );
+
+        info.setBorder(
+                Theme.createRoundedBorder(
+                        Theme.KHAKI_BEIGE,
+                        12,
+                        1,
+                        6
+                )
+        );
+
+        JLabel infoLabel =
+                new JLabel(
+                        "Team availability controls whether the team can receive a new emergency assignment."
+                );
+
+        infoLabel.setFont(
+                Theme.SMALL_FONT
+        );
+
+        infoLabel.setBorder(
+                BorderFactory.createEmptyBorder(
+                        2,
+                        4,
+                        2,
+                        4
+                )
+        );
+
+        infoLabel.setForeground(
+                Theme.STONE_BROWN
+        );
+
+        info.add(
+                infoLabel,
                 BorderLayout.CENTER
         );
 
+        outerPanel.add(
+                formTitle,
+                BorderLayout.NORTH
+        );
+
+        // Vertical-only scrolling. Horizontal scrolling is forbidden,
+        // so the form never pushes the JTable outside the window.
+        JScrollPane formScroll =
+                new JScrollPane(
+                        form
+                );
+
+        formScroll.setBorder(
+                BorderFactory.createEmptyBorder()
+        );
+
+        formScroll.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        formScroll.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        );
+
+        formScroll.setOpaque(false);
+
+        formScroll.getViewport()
+                .setOpaque(false);
+
+        outerPanel.add(
+                formScroll,
+                BorderLayout.CENTER
+        );
+
+        outerPanel.add(
+                info,
+                BorderLayout.SOUTH
+        );
 
         return outerPanel;
     }
-
 
     // =========================================================
     // FORM ROW
@@ -475,7 +539,7 @@ public class TeamManagementPanel extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = row;
-        gbc.weightx = 0.35;
+        gbc.weightx = 0.30;
 
         panel.add(
                 label,
@@ -484,7 +548,7 @@ public class TeamManagementPanel extends JPanel {
 
 
         gbc.gridx = 1;
-        gbc.weightx = 0.65;
+        gbc.weightx = 0.70;
 
         panel.add(
                 component,
@@ -503,7 +567,7 @@ public class TeamManagementPanel extends JPanel {
                 new JPanel(
                         new BorderLayout(
                                 0,
-                                10
+                                9
                         )
                 );
 
@@ -511,9 +575,12 @@ public class TeamManagementPanel extends JPanel {
                 Theme.BACKGROUND
         );
 
+        panel.setMinimumSize(
+                new Dimension(0, 0)
+        );
 
         // =====================================================
-        // SEARCH
+        // SEARCH BAR
         // =====================================================
 
         JPanel searchPanel =
@@ -524,10 +591,7 @@ public class TeamManagementPanel extends JPanel {
                         )
                 );
 
-        searchPanel.setBackground(
-                Theme.BACKGROUND
-        );
-
+        searchPanel.setOpaque(false);
 
         JLabel searchLabel =
                 new JLabel(
@@ -535,13 +599,12 @@ public class TeamManagementPanel extends JPanel {
                 );
 
         searchLabel.setFont(
-                Theme.SUBTITLE_FONT
+                Theme.SMALL_FONT
         );
 
         searchLabel.setForeground(
                 Theme.TEXT
         );
-
 
         searchField =
                 new JTextField();
@@ -550,6 +613,19 @@ public class TeamManagementPanel extends JPanel {
                 searchField
         );
 
+        searchField.setMinimumSize(
+                new Dimension(
+                        70,
+                        36
+                )
+        );
+
+        searchField.setPreferredSize(
+                new Dimension(
+                        120,
+                        34
+                )
+        );
 
         JButton searchButton =
                 new JButton(
@@ -560,6 +636,16 @@ public class TeamManagementPanel extends JPanel {
                 searchButton
         );
 
+        searchButton.setFont(
+                Theme.SMALL_FONT
+        );
+
+        searchButton.setPreferredSize(
+                new Dimension(
+                        76,
+                        34
+                )
+        );
 
         JButton clearSearchButton =
                 new JButton(
@@ -570,23 +656,35 @@ public class TeamManagementPanel extends JPanel {
                 clearSearchButton
         );
 
-
-        searchButton.addActionListener(
-                e -> searchTeams()
+        clearSearchButton.setFont(
+                Theme.SMALL_FONT
         );
 
-
-        clearSearchButton.addActionListener(
-                e -> {
-
-                    searchField.setText(
-                            ""
-                    );
-
-                    loadTeams();
-                }
+        clearSearchButton.setPreferredSize(
+                new Dimension(
+                        68,
+                        34
+                )
         );
 
+        JPanel searchButtons =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                5,
+                                0
+                        )
+                );
+
+        searchButtons.setOpaque(false);
+
+        searchButtons.add(
+                searchButton
+        );
+
+        searchButtons.add(
+                clearSearchButton
+        );
 
         searchPanel.add(
                 searchLabel,
@@ -598,40 +696,15 @@ public class TeamManagementPanel extends JPanel {
                 BorderLayout.CENTER
         );
 
-
-        JPanel buttons =
-                new JPanel(
-                        new FlowLayout(
-                                FlowLayout.RIGHT,
-                                5,
-                                0
-                        )
-                );
-
-        buttons.setBackground(
-                Theme.BACKGROUND
-        );
-
-        buttons.add(
-                searchButton
-        );
-
-        buttons.add(
-                clearSearchButton
-        );
-
-
         searchPanel.add(
-                buttons,
+                searchButtons,
                 BorderLayout.EAST
         );
-
 
         panel.add(
                 searchPanel,
                 BorderLayout.NORTH
         );
-
 
         // =====================================================
         // TABLE
@@ -645,7 +718,6 @@ public class TeamManagementPanel extends JPanel {
                 "Members",
                 "Availability"
         };
-
 
         tableModel =
                 new DefaultTableModel(
@@ -663,17 +735,50 @@ public class TeamManagementPanel extends JPanel {
                     }
                 };
 
-
         teamTable =
                 new JTable(
                         tableModel
                 );
 
-
         styleTable(
                 teamTable
         );
 
+        teamTable.setAutoResizeMode(
+                JTable.AUTO_RESIZE_ALL_COLUMNS
+        );
+
+        teamTable.setFillsViewportHeight(
+                true
+        );
+
+        teamTable.setAutoCreateRowSorter(
+                true
+        );
+
+        teamTable.getColumnModel()
+                .getColumn(0)
+                .setMinWidth(55);
+
+        teamTable.getColumnModel()
+                .getColumn(1)
+                .setMinWidth(70);
+
+        teamTable.getColumnModel()
+                .getColumn(2)
+                .setMinWidth(60);
+
+        teamTable.getColumnModel()
+                .getColumn(3)
+                .setMinWidth(70);
+
+        teamTable.getColumnModel()
+                .getColumn(4)
+                .setMinWidth(45);
+
+        teamTable.getColumnModel()
+                .getColumn(5)
+                .setMinWidth(70);
 
         teamTable
                 .getSelectionModel()
@@ -687,28 +792,51 @@ public class TeamManagementPanel extends JPanel {
                         }
                 );
 
-
         JScrollPane scrollPane =
                 new JScrollPane(
                         teamTable
                 );
 
         scrollPane.setBorder(
-                BorderFactory.createLineBorder(
-                        Theme.STONE_BROWN
+                Theme.createRoundedBorder(
+                        Theme.STONE_BROWN,
+                        14,
+                        1,
+                        1
                 )
         );
 
+        scrollPane.getViewport()
+                .setBackground(
+                        Theme.WHITE
+                );
 
         panel.add(
                 scrollPane,
                 BorderLayout.CENTER
         );
 
+        searchButton.addActionListener(
+                e -> searchTeams()
+        );
+
+        clearSearchButton.addActionListener(
+                e -> {
+
+                    searchField.setText(
+                            ""
+                    );
+
+                    loadTeams();
+                }
+        );
+
+        searchField.addActionListener(
+                e -> searchTeams()
+        );
 
         return panel;
     }
-
 
     // =========================================================
     // ACTION BAR
@@ -718,17 +846,50 @@ public class TeamManagementPanel extends JPanel {
 
         JPanel panel =
                 new JPanel(
-                        new FlowLayout(
-                                FlowLayout.RIGHT,
-                                8,
-                                0
-                        )
+                        new BorderLayout()
                 );
 
         panel.setBackground(
                 Theme.BACKGROUND
         );
 
+        panel.setBorder(
+                BorderFactory.createEmptyBorder(
+                        8,
+                        0,
+                        0,
+                        0
+                )
+        );
+
+        JLabel hint =
+                new JLabel(
+                        "Select a team from the table to edit or remove it."
+                );
+
+        hint.setFont(
+                Theme.SMALL_FONT
+        );
+
+        hint.setForeground(
+                Theme.MUTED_TEXT
+        );
+
+        panel.add(
+                hint,
+                BorderLayout.WEST
+        );
+
+        JPanel buttons =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                7,
+                                0
+                        )
+                );
+
+        buttons.setOpaque(false);
 
         JButton addButton =
                 new JButton(
@@ -739,7 +900,6 @@ public class TeamManagementPanel extends JPanel {
                 addButton
         );
 
-
         JButton updateButton =
                 new JButton(
                         "UPDATE"
@@ -748,7 +908,6 @@ public class TeamManagementPanel extends JPanel {
         Theme.styleSecondaryButton(
                 updateButton
         );
-
 
         JButton deleteButton =
                 new JButton(
@@ -759,7 +918,6 @@ public class TeamManagementPanel extends JPanel {
                 deleteButton
         );
 
-
         JButton clearButton =
                 new JButton(
                         "CLEAR FORM"
@@ -768,7 +926,6 @@ public class TeamManagementPanel extends JPanel {
         Theme.styleSecondaryButton(
                 clearButton
         );
-
 
         addButton.addActionListener(
                 e -> addTeam()
@@ -786,27 +943,29 @@ public class TeamManagementPanel extends JPanel {
                 e -> clearForm()
         );
 
-
-        panel.add(
+        buttons.add(
                 addButton
         );
 
-        panel.add(
+        buttons.add(
                 updateButton
         );
 
-        panel.add(
+        buttons.add(
                 deleteButton
         );
 
-        panel.add(
+        buttons.add(
                 clearButton
         );
 
+        panel.add(
+                buttons,
+                BorderLayout.EAST
+        );
 
         return panel;
     }
-
 
     // =========================================================
     // ADD TEAM
@@ -1522,3 +1681,4 @@ public class TeamManagementPanel extends JPanel {
                 );
     }
 }
+
