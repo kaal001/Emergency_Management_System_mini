@@ -2121,19 +2121,7 @@ The same five-member team naming convention from the earlier project is retained
 
 Contribution allocation:
 
-```text
-Takbir   30%
-Shuvo    18%
-Ifaz     16%
-Ehsan    18%
-Suraiya  18%
-----------------
-Total    100%
-```
-
----
-
-# 59. Takbir — 30%
+# 59. Takbir 
 
 Primary area:
 
@@ -2178,7 +2166,7 @@ persistence
 
 ---
 
-# 60. Shuvo — 18%
+# 60. Shuvo 
 
 Primary area:
 
@@ -2224,7 +2212,7 @@ JDialog
 
 ---
 
-# 61. Ifaz — 16%
+# 61. Ifaz 
 
 Primary area:
 
@@ -2272,7 +2260,7 @@ team suitability
 
 ---
 
-# 62. Ehsan — 18%
+# 62. Ehsan 
 
 Primary area:
 
@@ -2313,7 +2301,7 @@ Emergency-Team relationship
 
 ---
 
-# 63. Suraiya — 18%
+# 63. Suraiya 
 
 Primary area:
 
